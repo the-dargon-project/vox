@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.IO;
+using Dargon.Messages.Internals;
 
-namespace Dargon.Messages.Serialization {
+namespace Dargon.Messages {
    public static class Serialize {
       public static void To<T>(Stream target) {
          var serializer = TypeSerializerRegistry<T>.Serializer;

@@ -1,7 +1,6 @@
 ﻿using System;
-using Dargon.Messages.Internals;
 
-namespace Dargon.Messages.Serialization {
+namespace Dargon.Messages.Internals {
    public static class TypeSerializerRegistry<T> {
       private static ITypeSerializer<T> _serializer;
 

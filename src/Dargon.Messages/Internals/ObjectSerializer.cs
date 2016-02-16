@@ -1,11 +1,11 @@
-﻿using Dargon.Commons;
-using Dargon.Messages.Internals;
-using System.IO;
-using System.Threading;
+﻿using System.IO;
 using System.Linq;
+using System.Threading;
+using Dargon.Commons;
+using Dargon.Messages.Slots;
 
 // ReSharper disable StaticMemberInGenericType
-namespace Dargon.Messages.Serialization.Internals {
+namespace Dargon.Messages.Internals {
    public static class ObjectSerializer<T> {
       private static int serializeSlotCount = 1;
       private static int deserializeSlotCount = 1;

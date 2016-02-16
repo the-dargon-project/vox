@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
+using Dargon.Messages.Internals;
 
-namespace Dargon.Messages.Internals {
+namespace Dargon.Messages.Slots {
    public interface ISlotWriter {
       void WriteBytes(int slot, byte[] bytes);
       void WriteBytes(int slot, byte[] bytes, int offset, int length);

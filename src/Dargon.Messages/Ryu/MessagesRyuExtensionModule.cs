@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Dargon.Ryu.Extensibility;
+﻿using Dargon.Ryu.Extensibility;
 using Dargon.Ryu.Modules;
 
-namespace Dargon.Messages {
+namespace Dargon.Messages.Ryu {
    public class MessagesRyuExtensionModule : RyuModule, IRyuExtensionModule {
       public MessagesRyuExtensionModule() {
 

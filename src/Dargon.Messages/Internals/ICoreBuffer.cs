@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.IO;
-using Dargon.Messages.Serialization.Internals;
 
 namespace Dargon.Messages.Internals {
    public interface ICoreSerializerReader {

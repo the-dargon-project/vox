@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Diagnostics;
+using Dargon.Messages.Internals;
 
-namespace Dargon.Messages.Internals {
+namespace Dargon.Messages.Slots {
    public interface ISlotReader {
       byte[] ReadBytes(int slot);
    }
