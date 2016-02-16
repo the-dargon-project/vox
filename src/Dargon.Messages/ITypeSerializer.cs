@@ -6,5 +6,6 @@ namespace Dargon.Messages {
       TypeId TypeId { get; set; }
       void Serialize(ISlotWriter writer, T source);
       void Deserialize(ISlotReader reader, T target);
+      int MaxSlotCount { get; set; }
    }
 }

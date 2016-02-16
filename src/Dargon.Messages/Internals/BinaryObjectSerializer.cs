@@ -6,17 +6,26 @@ using Dargon.Messages.Slots;
 
 // ReSharper disable StaticMemberInGenericType
 namespace Dargon.Messages.Internals {
-   public static class ObjectSerializer<T> {
-      private static int serializeSlotCount = 1;
-      private static int deserializeSlotCount = 1;
+   public static unsafe class BinaryObjectSerializer<T> {
+      private const int kMaxSlotLength = 16;
+      private const int kZeroVarIntLength = 1;
+
       private static readonly ThreadLocal<BwToCswAdapter> binaryToCoreWriterAdapter = new ThreadLocal<BwToCswAdapter>(() => new BwToCswAdapter());
 
       private static ITypeSerializer<T> TypeSerializer => TypeSerializerRegistry<T>.Serializer;
       private static BwToCswAdapter BinaryWriterAdapter => binaryToCoreWriterAdapter.Value;
 
-      public static void Serialize(T t, BinaryWriter target) {
-         // Serialize target to slots
-         var slotWriter = new SlotWriter(serializeSlotCount);
+      public static void Serialize(T t, BinaryWriter writer) {
+         // Perform dry serialization run to determine output length
+         var dryWriter = new DrySlotWriter();
+         TypeSerializer.Serialize(dryWriter, t);
+
+         // Allocate buffer for slot data
+         var slotBufferSize = TypeSerializer.MaxSlotCount * kMaxSlotLength + kZeroVarIntLength;
+         byte* pSlots = stackalloc byte[slotBufferSize];
+
+
+
          TypeSerializer.Serialize(slotWriter, t);
 
          // Update anticipated slot count.

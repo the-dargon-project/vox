@@ -20,17 +20,17 @@ namespace Dargon.Messages.Internals {
       void CopyTo(ICoreSerializerWriter writer);
    }
 
-   public class CoreBuffer : ICoreBuffer {
-      private readonly MemoryStream stream;
+   public unsafe class CoreBuffer : ICoreBuffer {
+      private readonly MemoryStream dataStream;
 
-      public CoreBuffer(MemoryStream stream) {
-         this.stream = stream;
+      public CoreBuffer(MemoryStream dataStream) {
+         this.dataStream = dataStream;
       }
 
-      public long Length => stream.Length;
+      public long Length => dataStream.Length;
 
       public byte ReadByte() {
-         var b = stream.ReadByte();
+         var b = dataStream.ReadByte();
          if (b == -1) {
             throw new EndOfStreamException();
          }
@@ -41,30 +41,30 @@ namespace Dargon.Messages.Internals {
          var buffer = new byte[length];
          int offset = 0;
          while (offset < buffer.Length) {
-            offset += stream.Read(buffer, offset, length - offset);
+            offset += dataStream.Read(buffer, offset, length - offset);
          }
          return buffer;
       }
 
       public byte[] ReadRemaining() {
-         var bytesRemaining = stream.Length - stream.Position;
+         var bytesRemaining = dataStream.Length - dataStream.Position;
          return ReadBytes((int)bytesRemaining);
       }
 
       public void WriteByte(byte val) {
-         stream.WriteByte(val);
+         dataStream.WriteByte(val);
       }
 
       public void WriteBytes(byte[] val) {
-         stream.Write(val, 0, val.Length);
+         dataStream.Write(val, 0, val.Length);
       }
 
       public void WriteBytes(byte[] val, int offset, int length) {
-         stream.Write(val, offset, length);
+         dataStream.Write(val, offset, length);
       }
 
       public void CopyTo(ICoreSerializerWriter writer) {
-         writer.WriteBytes(stream.GetBuffer(), 0, (int)stream.Length);
+         writer.WriteBytes(dataStream.GetBuffer(), 0, (int)dataStream.Length);
       }
    }
 }

@@ -8,50 +8,43 @@ namespace Dargon.Messages.Slots {
       void WriteBytes(int slot, byte[] bytes, int offset, int length);
    }
 
-   public class SlotContainer {
-      private const double kGrowthFactor = 1.5;
-      protected ICoreBuffer[] _slots;
+   /// <summary>
+   /// Performs a dry-run of serialization on a given object
+   /// </summary>
+   public class DrySlotWriter : ISlotWriter {
+      private const int kPrimitiveTypeIdSize = 1;
 
-      public ICoreBuffer[] ReleaseSlots() {
-         var result = _slots;
-         _slots = null;
-         return result;
-      }
+      private int expectedSlot = 0;
+      private int slotTableSize;
+      private int dataTableSize;
 
-      protected void Resize(int slotCount) {
-         var newSlots = new ICoreBuffer[slotCount];
-         if (_slots != null) {
-            Array.Copy(_slots, newSlots, _slots.Length);
-         }
-         _slots = newSlots;
-      }
-
-      protected void EnsureIndexable(int slot) {
-         while (slot >= _slots.Length) {
-            Resize((int)Math.Ceiling(_slots.Length * kGrowthFactor));
-         }
-      }
-   }
-
-   public class SlotWriter : SlotContainer, ISlotWriter {
-      public SlotWriter(int slotCount) {
-         Resize(slotCount);
-      }
+      public int SlotTableSize => slotTableSize;
+      public int DataTableSize => dataTableSize;
 
       public void WriteBytes(int slot, byte[] bytes) {
          WriteBytes(slot, bytes, 0, bytes.Length);
       }
 
       public void WriteBytes(int slot, byte[] bytes, int offset, int length) {
-         Helper(slot, TypeId.ByteArray, b => b.WriteBytes(bytes, offset, length));
+         InnerHelper(
+            slot,
+            kPrimitiveTypeIdSize + CoreSerializer.ComputeVariableIntLength(bytes.Length),
+            bytes.Length
+         );
       }
 
-      private void Helper(int slot, TypeId typeId, Action<ICoreBuffer> write) {
-         EnsureIndexable(slot);
-         var buffer = new CoreBuffer(new MemoryStream());
-         CoreSerializer.WriteVariableInt(buffer, (int)typeId);
-         write(buffer);
-         _slots[slot] = buffer;
+      private void InnerHelper(int slot, int slotTableEntrySize, int dataTableEntrySize) {
+         if (slot < expectedSlot) {
+            throw new InvalidOperationException("Slot serialization must occur sequentially.");
+         }
+
+         // We'll be serializing 0-length slots for skipped slots
+         int slotsToSkip = slot - expectedSlot;
+         slotTableSize += slotsToSkip * kPrimitiveTypeIdSize;
+
+         // Then we'll serialize the actual slot
+         slotTableSize += slotTableEntrySize;
+         dataTableSize += dataTableEntrySize;
       }
    }
 
