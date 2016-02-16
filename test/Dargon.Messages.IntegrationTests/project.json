@@ -1,0 +1,14 @@
+{
+    "frameworks": {
+        "net451": { }
+    },
+
+    "dependencies": {
+        "Dargon.Messages": "",
+        "NMockito": ""
+    },
+
+    "commands": {
+        "Dargon.Messages.IntegrationTests": "Dargon.Messages.IntegrationTests"
+    }
+}
