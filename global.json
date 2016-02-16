@@ -1,0 +1,12 @@
+{
+    "projects": [
+        "dependencies/messages/src",
+        "dependencies/messages/test",
+        "dependencies/commons/src",
+        "dependencies/ryu/src",
+        "dependencies/NMockito/src"
+    ],
+    "sdk": {
+        "version": "1.0.0-rc1-update1"
+    }
+}

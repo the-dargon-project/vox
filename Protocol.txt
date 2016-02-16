@@ -1,0 +1,29 @@
+T: C0 (192) - FF (255) Reserved (Note -64->63 fit in first byte)
+
+Reserved tIds: [-0x01, -0x40]
+-0x01 - null (also void)
+-0x02 - byte[]
+-0x03 - variable int (non-negative)
+-0x04 - variable int (negative)
+
+-0x20 - begin nested object
+-0x21 - begin superclass
+
+   -3 - array(non-polymorphic)
+   -4 - array(polymorphic)
+   -5 - map(non-polymorphic, non-polymorphic)
+   -6 - map(non-polymorphic, polymorphic)
+   -7 - map(polymorphic, non-polymorphic)
+   -8 - map(polymorphic, polymorphic)
+  
+
+Message Format:
+   body_length (varint)
+   payload:
+      type_id (varint)
+      slotSectionLength (varint)
+         slotLengths (i32s - no length)
+         slotBodies (byte[]s - no length)
+      dataSectionLength (varint)
+
+Expanding message body: Simply add after payload.
