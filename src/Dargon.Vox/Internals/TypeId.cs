@@ -2,6 +2,7 @@
    public enum TypeId : int {
       ByteArray            = -0x01,
       VarInt               = -0x02,
+      String               = -0x03,
 
       Null                 = -0x20,
       Void                 = -0x21,

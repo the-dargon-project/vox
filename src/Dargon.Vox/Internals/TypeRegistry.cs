@@ -13,6 +13,7 @@ namespace Dargon.Vox.Internals {
       static TypeRegistry() {
          RegisterTypes(new Dictionary<TypeId, Type> {
             [TypeId.ByteArray] = typeof(byte[]),
+            [TypeId.String] = typeof(string),
             [TypeId.Null] = typeof(NullType)
          });
       }

@@ -8,7 +8,7 @@ namespace Dargon.Vox.Internals {
       public static ITypeSerializer<T> Serializer => GetSerializer();
 
       private static ITypeSerializer<T> GetSerializer() {
-         if (serializer != null) {
+         if (serializer == null) {
             throw new KeyNotFoundException("No serializer for type " + typeof(T).FullName + " registered.");
          }
          return serializer;
@@ -17,10 +17,9 @@ namespace Dargon.Vox.Internals {
       public static void Register(ITypeSerializer<T> newSerializer) {
          if (newSerializer == null) {
             throw new ArgumentNullException(nameof(newSerializer));
-         } else if (Serializer != null) {
-            if (!newSerializer.Equals(Serializer)) {
-               throw new InvalidOperationException($"Duplicate registration of type {typeof(T).FullName}.");
-            }
+         }
+         if (serializer != null && !newSerializer.Equals(serializer)) {
+            throw new InvalidOperationException($"Duplicate registration of type {typeof(T).FullName}.");
          }
          serializer = newSerializer;
       }

@@ -1,4 +1,5 @@
 ﻿using Dargon.Vox.Data;
+using Dargon.Vox.Internals.TypePlaceholders;
 using Dargon.Vox.Slots;
 
 namespace Dargon.Vox.Internals.Deserialization {
@@ -11,9 +12,19 @@ namespace Dargon.Vox.Internals.Deserialization {
          _nextSlot = 0;
       }
 
-      public byte[] ReadBytes(int slot) {
+      public object ReadObject(int slot) {
          AdvanceUntil(slot);
-         return VoxObjectDeserializer.DeserializeNonpolymorphic<byte[]>(_reader);
+         return VoxObjectDeserializer.Deserialize(_reader);
+      }
+
+      public T ReadObject<T>(int slot) => ReadNonpolymorphicHelper<T>(slot);
+      public byte[] ReadBytes(int slot) => ReadNonpolymorphicHelper<byte[]>(slot);
+      public string ReadString(int slot) => ReadNonpolymorphicHelper<string>(slot);
+      public object ReadNull(int slot) => ReadNonpolymorphicHelper<NullType>(slot);
+
+      private T ReadNonpolymorphicHelper<T>(int slot) {
+         AdvanceUntil(slot);
+         return VoxObjectDeserializer.DeserializeNonpolymorphic<T>(_reader);
       }
 
       private void AdvanceUntil(int slot) {
@@ -21,6 +32,7 @@ namespace Dargon.Vox.Internals.Deserialization {
             VoxObjectSkipper.Skip(_reader);
             _nextSlot++;
          }
+         _nextSlot++;
       }
    }
 }

@@ -1,9 +1,10 @@
-﻿using System;
+﻿using Dargon.Vox.Data;
+using Dargon.Vox.Utilities;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using Dargon.Vox.Data;
-using Dargon.Vox.Utilities;
+using System.Text;
 
 namespace Dargon.Vox.Internals.Serialization {
    public static class VoxFrameSerializer {
@@ -37,15 +38,17 @@ namespace Dargon.Vox.Internals.Serialization {
 
    public class TwoPassFrameWriter<T> : ISlotWriter {
       private readonly Stack<int> objectLengthStack = new Stack<int>();
+      private readonly Queue<int> stringLengthQueue = new Queue<int>(); 
       private readonly FakeForwardDataWriter fakeWriter = new FakeForwardDataWriter();
       private bool isDryPass;
       private IForwardDataWriter output;
+      private byte[] stringBuffer = new byte[16];
 
       public void RunPasses(T subject, IForwardDataWriter writer) {
          PrepareDryPass();
-         WriteObject<T>(subject);
+         WriteObject<T>(0, subject);
          PrepareRealPass(writer);
-         WriteObject<T>(subject);
+         WriteObject<T>(0, subject);
          Trace.Assert(objectLengthStack.Count == 0);
       }
 
@@ -69,25 +72,29 @@ namespace Dargon.Vox.Internals.Serialization {
          writer.WriteByte(0);
       }
 
-      public void WriteObject<U>(U subject) {
+      public void WriteObject<U>(int slot, U subject) {
          if (typeof(U) == typeof(byte[])) {
-            WriteBytes(0, (byte[])(object)subject);
+            WriteBytes(slot, (byte[])(object)subject);
+         } else if (typeof(U) == typeof(string)) {
+            WriteString(slot, (string)(object)subject);
          } else {
-            // Custom object writer pushes to length queue on its own
-            WriteCustomObject(subject);
-            return;
+            if (subject == null) {
+               WriteNull(slot);
+            } else {
+               // Custom object writer pushes to length queue on its own
+               WriteCustomObject(slot, subject);
+            }
          }
       }
 
-      public void WriteCustomObject<U>(U subject) {
+      public void WriteCustomObject<U>(int slot, U subject) {
          if (isDryPass) {
             int savedWriterPosition = fakeWriter.Position;
-            fakeWriter.Position = 0;
             TypeSerializerRegistry<U>.Serializer.Serialize(this, subject);
-            objectLengthStack.Push(fakeWriter.Position);
-            fakeWriter.Position += fakeWriter.Position.ComputeVariableIntLength();
+            var length = fakeWriter.Position - savedWriterPosition;
+            objectLengthStack.Push(length);
             fakeWriter.Position += FullTypeToBinaryRepresentationCache<U>.Serialization.Length;
-            fakeWriter.Position += savedWriterPosition;
+            fakeWriter.Position += length.ComputeVariableIntLength();
          } else {
             output.WriteBytes(FullTypeToBinaryRepresentationCache<U>.Serialization);
             output.WriteVariableInt(objectLengthStack.Pop());
@@ -113,11 +120,34 @@ namespace Dargon.Vox.Internals.Serialization {
          }
       }
 
+      public unsafe void WriteString(int slot, string str) {
+         if (str == null) {
+            WriteNull(slot);
+         } else if (isDryPass) {
+            var bodyByteCount = Encoding.UTF8.GetByteCount(str);
+            stringLengthQueue.Enqueue(bodyByteCount);
+            fakeWriter.Position += TypeId.String.ComputeTypeIdLength() + bodyByteCount.ComputeVariableIntLength() + bodyByteCount;
+         } else {
+            var bodyByteCount = stringLengthQueue.Dequeue();
+            EnsureSize(ref stringBuffer, bodyByteCount);
+            Encoding.UTF8.GetBytes(str, 0, str.Length, stringBuffer, 0);
+            output.WriteTypeId(TypeId.String);
+            output.WriteVariableInt(bodyByteCount);
+            output.WriteBytes(stringBuffer, 0, bodyByteCount);
+         }
+      }
+
       public void WriteNull(int slot) {
          if (isDryPass) {
             fakeWriter.Position += TypeId.Null.ComputeTypeIdLength();
          } else {
             output.WriteTypeId(TypeId.Null);
+         }
+      }
+
+      private void EnsureSize(ref byte[] buffer, int length) {
+         if (buffer.Length < length) {
+            buffer = new byte[length];
          }
       }
 

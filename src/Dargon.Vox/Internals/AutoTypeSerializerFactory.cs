@@ -21,24 +21,37 @@ namespace Dargon.Vox.Internals {
             typeof(ReaderWriterCallHelper<>), nameof(ReaderWriterCallHelper<object>.EmitRead));
 
       public static IReadOnlyDictionary<Type, ITypeSerializer> CreateMany(IReadOnlyList<Type> types) {
-         return types.ToDictionary(type => type, type => CreateTypeSerializer(type));
+         return types.ToDictionary(type => type, Create);
       }
 
-      private static ITypeSerializer CreateTypeSerializer(Type type) {
+      public static ITypeSerializer<T> Create<T>() => (ITypeSerializer<T>)Create(typeof(T));
+
+      public static ITypeSerializer Create(Type type) {
          var serialize = new DynamicMethod($"__serialize_{type.FullName}", typeof(void), new[] { typeof(ISlotWriter), type }, type);
-         var deserialize = new DynamicMethod($"__deserialize_{type.FullName}", typeof(void), new[] { typeof(ISlotWriter), type }, type);
+         var deserialize = new DynamicMethod($"__deserialize_{type.FullName}", typeof(void), new[] { typeof(ISlotReader), type }, type);
 
          var serializeEmitter = serialize.GetILGenerator();
          var deserializeEmitter = deserialize.GetILGenerator();
 
-         var fieldsToSerialize = type.GetFields().Where(x => !x.IsInitOnly).Select((fi, i) => new { Index = i, FieldInfo = fi });
+         var bindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+         var fieldsToSerialize = type.GetFields(bindingFlags).Where(x => !x.IsInitOnly).Select((fi, i) => new { Index = i, FieldInfo = fi });
          foreach (var kvp in fieldsToSerialize) {
             EmitFieldSerialization(serializeEmitter, kvp.Index, kvp.FieldInfo);
             EmitFieldDeserialization(deserializeEmitter, kvp.Index, kvp.FieldInfo);
          }
 
-         var serializerType = typeof(InlineTypeSerializer<>).MakeGenericType(type);
-         return (ITypeSerializer)Activator.CreateInstance(serializerType, serialize, deserialize);
+         serializeEmitter.Emit(OpCodes.Ret);
+         deserializeEmitter.Emit(OpCodes.Ret);
+
+         var serializerType = typeof(AutoTypeSerializer<>).MakeGenericType(type);
+         var serializerConstructor = serializerType.GetConstructors()[0];
+         var ctorParams = serializerConstructor.GetParameters();
+         var serializeMethodType = ctorParams[0].ParameterType;
+         var deserializeMethodType = ctorParams[1].ParameterType;
+         return (ITypeSerializer)Activator.CreateInstance(
+            serializerType,
+            serialize.CreateDelegate(serializeMethodType),
+            deserialize.CreateDelegate(deserializeMethodType));
       }
 
       private static void EmitFieldSerialization(ILGenerator serializeEmitter, int slot, FieldInfo field) {
@@ -69,6 +82,14 @@ namespace Dargon.Vox.Internals {
          deserializeEmitter.Emit(OpCodes.Stfld, field);
       }
 
+      private class AutoTypeSerializer<T> : InlineTypeSerializer<T> {
+         public AutoTypeSerializer(Action<ISlotWriter, T> write, Action<ISlotReader, T> read) : base(write, read) {}
+
+         public override bool Equals(object obj) {
+            return GetType() == obj?.GetType();
+         }
+      }
+
       private static class ReaderWriterCallHelper<T> {
          private static readonly MethodInfo writerMethod;
          private static readonly MethodInfo readerMethod;
@@ -79,8 +100,18 @@ namespace Dargon.Vox.Internals {
             if (typeof(T) == typeof(byte[])) {
                writerMethod = slotWriter.GetMethod(nameof(ISlotWriter.WriteBytes));
                readerMethod = slotReader.GetMethod(nameof(ISlotReader.ReadBytes));
+            } else if (typeof(T) == typeof(string)) {
+               writerMethod = slotWriter.GetMethod(nameof(ISlotWriter.WriteString));
+               readerMethod = slotReader.GetMethod(nameof(ISlotReader.ReadString));
             } else {
-               throw new NotImplementedException();
+               writerMethod = slotWriter.GetMethods()
+                                        .First(m => m.Name == nameof(ISlotWriter.WriteObject))
+                                        .MakeGenericMethod(typeof(T));
+
+               // TODO: Not Null + Sealed Constraint allows for nonpolymorphic call
+               readerMethod = slotReader.GetMethods()
+                                        .Where(m => m.Name == nameof(ISlotReader.ReadObject))
+                                        .First(m => !m.IsGenericMethod);
             }
          }
 

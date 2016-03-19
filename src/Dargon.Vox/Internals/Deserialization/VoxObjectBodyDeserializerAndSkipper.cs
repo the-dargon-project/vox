@@ -1,3 +1,4 @@
+using System.Text;
 using Dargon.Vox.Data;
 using Dargon.Vox.Internals.TypePlaceholders;
 using Dargon.Vox.Slots;
@@ -9,6 +10,10 @@ namespace Dargon.Vox.Internals.Deserialization {
          if (typeof(T) == typeof(byte[])) {
             var count = input.ReadVariableInt();
             return (T)(object)input.ReadBytes(count);
+         } else if (typeof(T) == typeof(string)) {
+            var length = input.ReadVariableInt();
+            var buffer = input.ReadBytes(length);
+            return (T)(object)Encoding.ASCII.GetString(buffer, 0, length);
          } else if (typeof(T) == typeof(NullType)) {
             return (T)(object)null;
          } else {
@@ -18,6 +23,9 @@ namespace Dargon.Vox.Internals.Deserialization {
 
       public static void Skip(ILengthLimitedForwardDataReader input) {
          if (typeof(T) == typeof(byte[])) {
+            var count = input.ReadVariableInt();
+            input.SkipBytes(count);
+         } else if (typeof(T) == typeof(string)) {
             var count = input.ReadVariableInt();
             input.SkipBytes(count);
          } else if (typeof(T) == typeof(NullType)) {
