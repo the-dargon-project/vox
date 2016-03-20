@@ -49,6 +49,9 @@ namespace Dargon.Vox.Utilities {
          if (parameterTypes.Length >= 3) emitter.Emit(OpCodes.Ldarg_2);
          if (parameterTypes.Length >= 4) throw new NotImplementedException();
          emitter.Emit(OpCodes.Call, methodInfo);
+         if (methodInfo.ReturnType.IsValueType && !invokeMethod.ReturnType.IsValueType) {
+            emitter.Emit(OpCodes.Box, methodInfo.ReturnType);
+         }
          emitter.Emit(OpCodes.Ret);
 
          return (T)(object)result.CreateDelegate(typeof(T));
