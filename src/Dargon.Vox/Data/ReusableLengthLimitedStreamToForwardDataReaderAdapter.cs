@@ -12,13 +12,17 @@ namespace Dargon.Vox.Data {
       }
       
       public byte[] ReadBytes(int length) {
-         Advance(length);
          var buffer = new byte[length];
+         ReadBytes(length, buffer);
+         return buffer;
+      }
+
+      public void ReadBytes(int length, byte[] buffer) {
+         Advance(length);
          int offset = 0;
-         while (offset < buffer.Length) {
+         while (offset < length) {
             offset += _target.Read(buffer, offset, length - offset);
          }
-         return buffer;
       }
 
       public void SkipBytes(int count) {

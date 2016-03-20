@@ -1,0 +1,24 @@
+{
+    "frameworks": {
+        "net451": {
+            "frameworkAssemblies": {
+                "System.Xml": ""
+            }
+        }
+    },
+
+    "dependencies": {
+        "Dargon.Vox": "",
+        "Dargon.Vox.InternalTestUtils": "",
+        "NMockito": "",
+        "protobuf-net": "2.0.0.668"
+    },
+
+    "compilationOptions": {
+        "emitEntryPoint": true
+    },
+
+    "commands": {
+        "Dargon.Vox.IntegrationTests": "Dargon.Vox.AcceptanceTests"
+    }
+}

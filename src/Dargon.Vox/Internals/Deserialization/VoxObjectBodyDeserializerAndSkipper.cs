@@ -5,6 +5,8 @@ using SubReader = Dargon.Vox.Data.ReusableLengthLimitedSubForwardDataReaderProxy
 
 namespace Dargon.Vox.Internals.Deserialization {
    public static class VoxObjectBodyDeserializerAndSkipper<T> {
+      private static byte[] stringBuffer = new byte[16];
+
       public static T Deserialize(ILengthLimitedForwardDataReader input) {
          if (typeof(T) == typeof(byte[])) {
             var count = input.ReadVariableInt();
@@ -17,8 +19,9 @@ namespace Dargon.Vox.Internals.Deserialization {
             return (T)(object)(input.ReadByte() | (input.ReadByte() << 8) | (input.ReadByte() << 16) | (input.ReadByte() << 24));
          } else if (typeof(T) == typeof(string)) {
             var length = input.ReadVariableInt();
-            var buffer = input.ReadBytes(length);
-            return (T)(object)Encoding.ASCII.GetString(buffer, 0, length);
+            EnsureSize(ref stringBuffer, length);
+            input.ReadBytes(length, stringBuffer);
+            return (T)(object)Encoding.UTF8.GetString(stringBuffer, 0, length);
          } else if (typeof(T) == typeof(NullType)) {
             return (T)(object)null;
          } else {
@@ -61,6 +64,12 @@ namespace Dargon.Vox.Internals.Deserialization {
             return instance;
          } finally {
             ReusableSlotReaderAndSubReaderPool.Return(slotReader, subReader);
+         }
+      }
+
+      private static void EnsureSize(ref byte[] buffer, int length) {
+         if (buffer.Length < length) {
+            buffer = new byte[length];
          }
       }
    }

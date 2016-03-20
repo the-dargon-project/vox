@@ -5,6 +5,7 @@
 
     "dependencies": {
         "Dargon.Vox": "",
+        "Dargon.Vox.InternalTestUtils": "",
         "NMockito": ""
     },
 

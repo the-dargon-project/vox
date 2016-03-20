@@ -20,6 +20,7 @@ namespace Dargon.Vox.Internals.Deserialization {
       public T ReadObject<T>(int slot) => ReadNonpolymorphicHelper<T>(slot);
       public byte[] ReadBytes(int slot) => ReadNonpolymorphicHelper<byte[]>(slot);
       public int ReadNumeric(int slot) {
+         AdvanceUntil(slot);
          var typeId = _reader.ReadTypeId();
          if (typeId == TypeId.Int8) {
             return _reader.ReadByte();

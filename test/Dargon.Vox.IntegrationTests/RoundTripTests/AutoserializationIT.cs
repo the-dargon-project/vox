@@ -1,4 +1,4 @@
-﻿using Dargon.Vox.Internals;
+﻿using Dargon.Vox.InternalTestUtils;
 using NMockito;
 using Xunit;
 
