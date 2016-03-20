@@ -1,0 +1,28 @@
+T: C0 (192) - FF (255) Reserved (Note -64->63 fit in first byte)
+
+All negative TIDs are reserved.
+
+Useful Reserved tIds: [-0x01, -0x40]
+-0x01 - byte[]
+-0x02 - variable int
+-0x03 - string
+-0x04 - sbyte
+-0x05 - short
+-0x06 - int
+-0x07 - long
+
+-0x20 - null
+-0x21 - void (DNE, Empty Slot)
+
+-0x30 - begin object
+-0x31 - begin superclass
+-0x32 - end object
+-0x33 - begin generic typeid
+-0x34 - end generic typeid
+
+-3 - array(non-polymorphic)
+-4 - array(polymorphic)
+-5 - map(non-polymorphic, non-polymorphic)
+-6 - map(non-polymorphic, polymorphic)
+-7 - map(polymorphic, non-polymorphic)
+-8 - map(polymorphic, polymorphic)

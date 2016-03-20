@@ -1,7 +1,7 @@
 {
     "projects": [
-        "dependencies/messages/src",
-        "dependencies/messages/test",
+        "dependencies/vox/src",
+        "dependencies/vox/test",
         "dependencies/commons/src",
         "dependencies/ryu/src",
         "dependencies/NMockito/src"

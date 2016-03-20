@@ -1,0 +1,126 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.24720.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "A. Solution Items", "A. Solution Items", "{862E5F57-469E-493A-8C33-8C917582B273}"
+	ProjectSection(SolutionItems) = preProject
+		build_config.csx = build_config.csx
+		build_entry.csx = build_entry.csx
+		global.json = global.json
+		Protocol.txt = Protocol.txt
+		TypeIDs.txt = TypeIDs.txt
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "B. src", "B. src", "{90F82554-7270-460D-969A-1CAEF1B80E41}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "C. test", "C. test", "{03DA5521-7A04-4172-8E92-290F33DA04D1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "D. dependencies", "D. dependencies", "{3395300E-8724-49A9-B630-AD923EF57A98}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Dargon.Commons", "dependencies\commons\src\Dargon.Commons\Dargon.Commons.xproj", "{2D7BAFC8-38E8-42EC-B215-F1A0A08E4BA8}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Dargon.Ryu.Api", "dependencies\ryu\src\Dargon.Ryu.Api\Dargon.Ryu.Api.xproj", "{97247D5E-A3C9-4050-84E8-2FD8E9178DB8}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Dargon.Ryu.Impl", "dependencies\ryu\src\Dargon.Ryu.Impl\Dargon.Ryu.Impl.xproj", "{8848F79E-7EBB-4D00-9645-FF86C39F8DE4}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "NMockito", "dependencies\NMockito\src\NMockito\NMockito.xproj", "{907353FD-0387-434C-BDA1-4822A3553A40}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Dargon.Vox", "dependencies\vox\src\Dargon.Vox\Dargon.Vox.xproj", "{64BDC2CE-1457-4AD8-AA1F-B39A5DDC42C2}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Dargon.Vox.IntegrationTests", "dependencies\vox\test\Dargon.Vox.IntegrationTests\Dargon.Vox.IntegrationTests.xproj", "{9F79AFF1-8CF5-47B1-9E67-03EF5FEF2F1D}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Dargon.Vox.UnitTests", "dependencies\vox\test\Dargon.Vox.UnitTests\Dargon.Vox.UnitTests.xproj", "{94A50AF5-E6BE-40E6-92B6-05E4689EA93F}"
+EndProject
+Project("{911E67C6-3D85-4FCE-B560-20A9C3E3FF48}") = "Dargon.Vox.IntegrationTests", "dependencies\vox\test\Dargon.Vox.IntegrationTests\bin\Debug\net451\win7-x64\Dargon.Vox.IntegrationTests.exe", "{31496345-2FE5-41EE-A1EF-6741EFFF80D0}"
+	ProjectSection(DebuggerProjectSystem) = preProject
+		PortSupplier = 00000000-0000-0000-0000-000000000000
+		Executable = C:\my-repositories\dargon\messages\dependencies\vox\test\Dargon.Vox.IntegrationTests\bin\Debug\net451\win7-x64\Dargon.Vox.IntegrationTests.exe
+		RemoteMachine = WIN-E5C0B65L3GR
+		StartingDirectory = C:\my-repositories\dargon\messages\dependencies\vox\test\Dargon.Vox.IntegrationTests\bin\Debug\net451\win7-x64\
+		Environment = Default
+		LaunchingEngine = 00000000-0000-0000-0000-000000000000
+		UseLegacyDebugEngines = No
+		LaunchSQLEngine = No
+		AttachLaunchAction = No
+	EndProjectSection
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Dargon.Vox.AcceptanceTests", "dependencies\vox\test\Dargon.Vox.AcceptanceTests\Dargon.Vox.AcceptanceTests.xproj", "{B160C398-483D-4E60-94DE-E6319D96F8FE}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Dargon.Vox.InternalTestUtils", "dependencies\vox\test\Dargon.Vox.InternalTestUtils\Dargon.Vox.InternalTestUtils.xproj", "{FD64EABA-21E2-4DC8-97F0-133FFB3EE4CD}"
+EndProject
+Project("{911E67C6-3D85-4FCE-B560-20A9C3E3FF48}") = "Dargon.Vox.AcceptanceTests", "dependencies\vox\test\Dargon.Vox.AcceptanceTests\bin\Release\net451\win7-x64\Dargon.Vox.AcceptanceTests.exe", "{8D2C74CC-CC27-48D6-80D7-1F569911DA9B}"
+	ProjectSection(DebuggerProjectSystem) = preProject
+		PortSupplier = 00000000-0000-0000-0000-000000000000
+		Executable = C:\my-repositories\dargon\messages\dependencies\vox\test\Dargon.Vox.AcceptanceTests\bin\Release\net451\win7-x64\Dargon.Vox.AcceptanceTests.exe
+		RemoteMachine = DESKTOP-5370MFG
+		StartingDirectory = C:\my-repositories\dargon\messages\dependencies\vox\test\Dargon.Vox.AcceptanceTests\bin\Release\net451\win7-x64
+		Environment = Default
+		LaunchingEngine = 00000000-0000-0000-0000-000000000000
+		UseLegacyDebugEngines = No
+		LaunchSQLEngine = No
+		AttachLaunchAction = No
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2D7BAFC8-38E8-42EC-B215-F1A0A08E4BA8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2D7BAFC8-38E8-42EC-B215-F1A0A08E4BA8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2D7BAFC8-38E8-42EC-B215-F1A0A08E4BA8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2D7BAFC8-38E8-42EC-B215-F1A0A08E4BA8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{97247D5E-A3C9-4050-84E8-2FD8E9178DB8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{97247D5E-A3C9-4050-84E8-2FD8E9178DB8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{97247D5E-A3C9-4050-84E8-2FD8E9178DB8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{97247D5E-A3C9-4050-84E8-2FD8E9178DB8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8848F79E-7EBB-4D00-9645-FF86C39F8DE4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8848F79E-7EBB-4D00-9645-FF86C39F8DE4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8848F79E-7EBB-4D00-9645-FF86C39F8DE4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8848F79E-7EBB-4D00-9645-FF86C39F8DE4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{907353FD-0387-434C-BDA1-4822A3553A40}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{907353FD-0387-434C-BDA1-4822A3553A40}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{907353FD-0387-434C-BDA1-4822A3553A40}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{907353FD-0387-434C-BDA1-4822A3553A40}.Release|Any CPU.Build.0 = Release|Any CPU
+		{64BDC2CE-1457-4AD8-AA1F-B39A5DDC42C2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{64BDC2CE-1457-4AD8-AA1F-B39A5DDC42C2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{64BDC2CE-1457-4AD8-AA1F-B39A5DDC42C2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{64BDC2CE-1457-4AD8-AA1F-B39A5DDC42C2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9F79AFF1-8CF5-47B1-9E67-03EF5FEF2F1D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9F79AFF1-8CF5-47B1-9E67-03EF5FEF2F1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9F79AFF1-8CF5-47B1-9E67-03EF5FEF2F1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9F79AFF1-8CF5-47B1-9E67-03EF5FEF2F1D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{94A50AF5-E6BE-40E6-92B6-05E4689EA93F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{94A50AF5-E6BE-40E6-92B6-05E4689EA93F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{94A50AF5-E6BE-40E6-92B6-05E4689EA93F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{94A50AF5-E6BE-40E6-92B6-05E4689EA93F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{31496345-2FE5-41EE-A1EF-6741EFFF80D0}.Debug|Any CPU.ActiveCfg = Release|Any CPU
+		{31496345-2FE5-41EE-A1EF-6741EFFF80D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B160C398-483D-4E60-94DE-E6319D96F8FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B160C398-483D-4E60-94DE-E6319D96F8FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B160C398-483D-4E60-94DE-E6319D96F8FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B160C398-483D-4E60-94DE-E6319D96F8FE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FD64EABA-21E2-4DC8-97F0-133FFB3EE4CD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FD64EABA-21E2-4DC8-97F0-133FFB3EE4CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FD64EABA-21E2-4DC8-97F0-133FFB3EE4CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FD64EABA-21E2-4DC8-97F0-133FFB3EE4CD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8D2C74CC-CC27-48D6-80D7-1F569911DA9B}.Debug|Any CPU.ActiveCfg = Release|Any CPU
+		{8D2C74CC-CC27-48D6-80D7-1F569911DA9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{2D7BAFC8-38E8-42EC-B215-F1A0A08E4BA8} = {3395300E-8724-49A9-B630-AD923EF57A98}
+		{97247D5E-A3C9-4050-84E8-2FD8E9178DB8} = {3395300E-8724-49A9-B630-AD923EF57A98}
+		{8848F79E-7EBB-4D00-9645-FF86C39F8DE4} = {3395300E-8724-49A9-B630-AD923EF57A98}
+		{907353FD-0387-434C-BDA1-4822A3553A40} = {3395300E-8724-49A9-B630-AD923EF57A98}
+		{64BDC2CE-1457-4AD8-AA1F-B39A5DDC42C2} = {90F82554-7270-460D-969A-1CAEF1B80E41}
+		{9F79AFF1-8CF5-47B1-9E67-03EF5FEF2F1D} = {03DA5521-7A04-4172-8E92-290F33DA04D1}
+		{94A50AF5-E6BE-40E6-92B6-05E4689EA93F} = {03DA5521-7A04-4172-8E92-290F33DA04D1}
+		{B160C398-483D-4E60-94DE-E6319D96F8FE} = {03DA5521-7A04-4172-8E92-290F33DA04D1}
+		{FD64EABA-21E2-4DC8-97F0-133FFB3EE4CD} = {03DA5521-7A04-4172-8E92-290F33DA04D1}
+	EndGlobalSection
+EndGlobal

@@ -191,3 +191,7 @@ NuGet.exe
 
 # Scriptcs
 scriptcs_nuget.config
+
+# Rider
+.idea
+*.iml
