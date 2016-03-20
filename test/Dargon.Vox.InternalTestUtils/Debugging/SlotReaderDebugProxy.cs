@@ -14,6 +14,7 @@ namespace Dargon.Vox.InternalTestUtils.Debugging {
       public byte[] ReadBytes(int slot) => ProxyResult(slot, "Read Bytes", target.ReadBytes, arr => arr.Length + " bytes");
       public int ReadNumeric(int slot) => ProxyResult(slot, "Read Numeric", target.ReadNumeric);
       public string ReadString(int slot) => ProxyResult(slot, "Read String", target.ReadString);
+      public Guid ReadGuid(int slot) => ProxyResult(slot, "Read Guid", target.ReadGuid);
       public object ReadNull(int slot) => ProxyResult(slot, "Read Null", target.ReadNull);
 
       private T ProxyResult<T>(int slot, string desc, Func<int, T> func, Func<T, string> stringify = null) {

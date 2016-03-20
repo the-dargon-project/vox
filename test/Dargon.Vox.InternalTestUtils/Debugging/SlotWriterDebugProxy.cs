@@ -31,6 +31,11 @@ namespace Dargon.Vox.InternalTestUtils.Debugging {
          target.WriteNumeric(slot, val);
       }
 
+      public void WriteGuid(int slot, Guid guid) {
+         Out(slot, "Write Guid: " + guid);
+         target.WriteGuid(slot, guid);
+      }
+
       public void WriteString(int slot, string s) {
          Out(slot, "Write String: " + s);
          target.WriteString(slot, s);

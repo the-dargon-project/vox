@@ -16,7 +16,8 @@ namespace Dargon.Vox {
       private static readonly SerializerOptions defaultSerializerOptions = new SerializerOptions();
 
       public static T From<T>(Stream target) {
-         return (T)From(target);
+         var result = From(target);
+         return (T)result;
       }
 
       public static object From(Stream target) {

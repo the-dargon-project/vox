@@ -1,4 +1,5 @@
-﻿using Dargon.Vox.Data;
+﻿using System;
+using Dargon.Vox.Data;
 using Dargon.Vox.Internals.TypePlaceholders;
 using Dargon.Vox.Slots;
 
@@ -33,6 +34,7 @@ namespace Dargon.Vox.Internals.Deserialization {
          }
       }
       public string ReadString(int slot) => ReadNonpolymorphicHelper<string>(slot);
+      public Guid ReadGuid(int slot) => ReadNonpolymorphicHelper<Guid>(slot);
       public object ReadNull(int slot) => ReadNonpolymorphicHelper<NullType>(slot);
 
       private T ReadNonpolymorphicHelper<T>(int slot) {

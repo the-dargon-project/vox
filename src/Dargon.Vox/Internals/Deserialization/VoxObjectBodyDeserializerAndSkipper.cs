@@ -1,3 +1,4 @@
+using System;
 using Dargon.Vox.Data;
 using Dargon.Vox.Internals.TypePlaceholders;
 using System.Text;
@@ -5,7 +6,8 @@ using SubReader = Dargon.Vox.Data.ReusableLengthLimitedSubForwardDataReaderProxy
 
 namespace Dargon.Vox.Internals.Deserialization {
    public static class VoxObjectBodyDeserializerAndSkipper<T> {
-      private static byte[] stringBuffer = new byte[16];
+      [ThreadStatic] private static byte[] stringBuffer;
+      [ThreadStatic] private static byte[] guidBuffer;
 
       public static T Deserialize(ILengthLimitedForwardDataReader input) {
          if (typeof(T) == typeof(byte[])) {
@@ -22,6 +24,10 @@ namespace Dargon.Vox.Internals.Deserialization {
             EnsureSize(ref stringBuffer, length);
             input.ReadBytes(length, stringBuffer);
             return (T)(object)Encoding.UTF8.GetString(stringBuffer, 0, length);
+         } else if (typeof(T) == typeof(Guid)) {
+            EnsureSize(ref guidBuffer, 16);
+            input.ReadBytes(16, guidBuffer);
+            return (T)(object)new Guid(guidBuffer);
          } else if (typeof(T) == typeof(NullType)) {
             return (T)(object)null;
          } else {
@@ -42,6 +48,8 @@ namespace Dargon.Vox.Internals.Deserialization {
          } else if (typeof(T) == typeof(string)) {
             var count = input.ReadVariableInt();
             input.SkipBytes(count);
+         } else if (typeof(T) == typeof(Guid)) {
+            input.SkipBytes(16);
          } else if (typeof(T) == typeof(NullType)) {
             // no body
          }
@@ -68,7 +76,7 @@ namespace Dargon.Vox.Internals.Deserialization {
       }
 
       private static void EnsureSize(ref byte[] buffer, int length) {
-         if (buffer.Length < length) {
+         if (buffer == null || buffer.Length < length) {
             buffer = new byte[length];
          }
       }

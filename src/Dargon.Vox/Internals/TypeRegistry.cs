@@ -17,6 +17,7 @@ namespace Dargon.Vox.Internals {
             [TypeId.Int16] = typeof(short),
             [TypeId.Int32] = typeof(int),
             [TypeId.String] = typeof(string),
+            [TypeId.Guid] = typeof(Guid),
             [TypeId.Null] = typeof(NullType)
          });
       }

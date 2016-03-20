@@ -1,4 +1,5 @@
-﻿using Dargon.Vox.InternalTestUtils;
+﻿using System;
+using Dargon.Vox.InternalTestUtils;
 using NMockito;
 using Xunit;
 
@@ -8,10 +9,11 @@ namespace Dargon.Vox.RoundTripTests {
       public void Hodgepodge() {
          TestTypeRegistrationHelpers.RegisterWithSerializer<HodgepodgeDto>();
          RoundTripTest.Run(new HodgepodgeDto {
-            String = CreatePlaceholder<string>(),
             Int8 = CreatePlaceholder<sbyte>(),
             Int16 = CreatePlaceholder<short>(),
-            Int32 = CreatePlaceholder<int>()
+            Int32 = CreatePlaceholder<int>(),
+            String = CreatePlaceholder<string>(),
+            Guid = CreatePlaceholder<Guid>()
          });
       }
 
@@ -37,18 +39,20 @@ namespace Dargon.Vox.RoundTripTests {
       }
 
       internal class HodgepodgeDto {
-         public string String { get; set; }
          public sbyte Int8 { get; set; }
          public short Int16 { get; set; }
          public int Int32 { get; set; }
+         public string String { get; set; }
+         public Guid Guid { get; set; }
 
          public override bool Equals(object obj) => Equals(obj as HodgepodgeDto);
 
          public bool Equals(HodgepodgeDto o) => o != null &&
-                                                Equals(String, o.String) &&
                                                 Int8 == o.Int8 &&
                                                 Int16 == o.Int16 &&
-                                                Int32 == o.Int32;
+                                                Int32 == o.Int32 &&
+                                                Equals(String, o.String) &&
+                                                Guid.Equals(o.Guid);
       }
 
       internal class StringLinkedListNode {

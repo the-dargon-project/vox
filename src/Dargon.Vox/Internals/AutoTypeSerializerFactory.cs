@@ -100,12 +100,15 @@ namespace Dargon.Vox.Internals {
             if (typeof(T) == typeof(byte[])) {
                writerMethod = slotWriter.GetMethod(nameof(ISlotWriter.WriteBytes));
                readerMethod = slotReader.GetMethod(nameof(ISlotReader.ReadBytes));
-            } else if (typeof(T) == typeof(string)) {
-               writerMethod = slotWriter.GetMethod(nameof(ISlotWriter.WriteString));
-               readerMethod = slotReader.GetMethod(nameof(ISlotReader.ReadString));
             } else if (typeof(T) == typeof(sbyte) || typeof(T) == typeof(short) || typeof(T) == typeof(int)) {
                writerMethod = slotWriter.GetMethod(nameof(ISlotWriter.WriteNumeric));
                readerMethod = slotReader.GetMethod(nameof(ISlotReader.ReadNumeric));
+            } else if (typeof(T) == typeof(Guid)) {
+               writerMethod = slotWriter.GetMethod(nameof(ISlotWriter.WriteGuid));
+               readerMethod = slotReader.GetMethod(nameof(ISlotReader.ReadGuid));
+            } else if (typeof(T) == typeof(string)) {
+               writerMethod = slotWriter.GetMethod(nameof(ISlotWriter.WriteString));
+               readerMethod = slotReader.GetMethod(nameof(ISlotReader.ReadString));
             } else {
                writerMethod = slotWriter.GetMethods()
                                         .First(m => m.Name == nameof(ISlotWriter.WriteObject))

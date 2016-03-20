@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
@@ -51,6 +52,8 @@ namespace Dargon.Vox.Internals.Serialization {
             WriteNumeric(slot, (int)(object)subject);
          } else if (typeof(U) == typeof(string)) {
             WriteString(slot, (string)(object)subject);
+         } else if (typeof(U) == typeof(Guid)) {
+            WriteGuid(slot, (Guid)(object)subject);
          } else {
             if (subject == null) {
                WriteNull(slot);
@@ -159,6 +162,16 @@ namespace Dargon.Vox.Internals.Serialization {
             output.WriteTypeId(TypeId.String);
             output.WriteVariableInt(bodyByteCount);
             output.WriteBytes(stringBuffer, 0, bodyByteCount);
+         }
+      }
+
+      public void WriteGuid(int slot, Guid guid) {
+         const int kGuidLength = 16;
+         if (isDryPass) {
+            fakeWriter.Position += TypeId.Guid.ComputeTypeIdLength() + kGuidLength;
+         } else {
+            output.WriteTypeId(TypeId.Guid);
+            output.WriteBytes(guid.ToByteArray(), 0, kGuidLength);
          }
       }
 
