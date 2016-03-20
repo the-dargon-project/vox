@@ -35,9 +35,9 @@ EndProject
 Project("{911E67C6-3D85-4FCE-B560-20A9C3E3FF48}") = "Dargon.Vox.IntegrationTests", "dependencies\vox\test\Dargon.Vox.IntegrationTests\bin\Debug\net451\win7-x64\Dargon.Vox.IntegrationTests.exe", "{31496345-2FE5-41EE-A1EF-6741EFFF80D0}"
 	ProjectSection(DebuggerProjectSystem) = preProject
 		PortSupplier = 00000000-0000-0000-0000-000000000000
-		Executable = C:\my-repositories\dargon\messages\dependencies\vox\test\Dargon.Vox.IntegrationTests\bin\Debug\net451\win7-x64\Dargon.Vox.IntegrationTests.exe
+		Executable = C:\my-repositories\dargon\vox\dependencies\vox\test\Dargon.Vox.IntegrationTests\bin\Debug\net451\win7-x64\Dargon.Vox.IntegrationTests.exe
 		RemoteMachine = WIN-E5C0B65L3GR
-		StartingDirectory = C:\my-repositories\dargon\messages\dependencies\vox\test\Dargon.Vox.IntegrationTests\bin\Debug\net451\win7-x64\
+		StartingDirectory = C:\my-repositories\dargon\vox\dependencies\vox\test\Dargon.Vox.IntegrationTests\bin\Debug\net451\win7-x64\
 		Environment = Default
 		LaunchingEngine = 00000000-0000-0000-0000-000000000000
 		UseLegacyDebugEngines = No
@@ -106,8 +106,8 @@ Global
 		{FD64EABA-21E2-4DC8-97F0-133FFB3EE4CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FD64EABA-21E2-4DC8-97F0-133FFB3EE4CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FD64EABA-21E2-4DC8-97F0-133FFB3EE4CD}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8D2C74CC-CC27-48D6-80D7-1F569911DA9B}.Debug|Any CPU.ActiveCfg = Release|Any CPU
-		{8D2C74CC-CC27-48D6-80D7-1F569911DA9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8D2C74CC-CC27-48D6-80D7-1F569911DA9B}.Debug|Any CPU.ActiveCfg = Release
+		{8D2C74CC-CC27-48D6-80D7-1F569911DA9B}.Release|Any CPU.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
