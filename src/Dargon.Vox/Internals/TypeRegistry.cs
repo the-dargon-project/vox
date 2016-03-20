@@ -13,6 +13,9 @@ namespace Dargon.Vox.Internals {
       static TypeRegistry() {
          RegisterTypes(new Dictionary<TypeId, Type> {
             [TypeId.ByteArray] = typeof(byte[]),
+            [TypeId.Int8] = typeof(sbyte),
+            [TypeId.Int16] = typeof(short),
+            [TypeId.Int32] = typeof(int),
             [TypeId.String] = typeof(string),
             [TypeId.Null] = typeof(NullType)
          });

@@ -103,6 +103,9 @@ namespace Dargon.Vox.Internals {
             } else if (typeof(T) == typeof(string)) {
                writerMethod = slotWriter.GetMethod(nameof(ISlotWriter.WriteString));
                readerMethod = slotReader.GetMethod(nameof(ISlotReader.ReadString));
+            } else if (typeof(T) == typeof(sbyte) || typeof(T) == typeof(short) || typeof(T) == typeof(int)) {
+               writerMethod = slotWriter.GetMethod(nameof(ISlotWriter.WriteNumeric));
+               readerMethod = slotReader.GetMethod(nameof(ISlotReader.ReadNumeric));
             } else {
                writerMethod = slotWriter.GetMethods()
                                         .First(m => m.Name == nameof(ISlotWriter.WriteObject))

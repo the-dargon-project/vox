@@ -5,6 +5,7 @@
 
       byte[] ReadBytes(int slot);
 
+      int ReadNumeric(int slot);
       string ReadString(int slot);
       object ReadNull(int slot);
    }

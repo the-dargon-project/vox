@@ -3,6 +3,9 @@
       ByteArray            = -0x01,
       VarInt               = -0x02,
       String               = -0x03,
+      Int8                 = -0x04,
+      Int16                = -0x05,
+      Int32                = -0x06,
 
       Null                 = -0x20,
       Void                 = -0x21,

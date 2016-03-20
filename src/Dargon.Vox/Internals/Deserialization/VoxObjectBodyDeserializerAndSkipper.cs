@@ -1,7 +1,6 @@
-using System.Text;
 using Dargon.Vox.Data;
 using Dargon.Vox.Internals.TypePlaceholders;
-using Dargon.Vox.Slots;
+using System.Text;
 using SubReader = Dargon.Vox.Data.ReusableLengthLimitedSubForwardDataReaderProxy;
 
 namespace Dargon.Vox.Internals.Deserialization {
@@ -10,6 +9,12 @@ namespace Dargon.Vox.Internals.Deserialization {
          if (typeof(T) == typeof(byte[])) {
             var count = input.ReadVariableInt();
             return (T)(object)input.ReadBytes(count);
+         } else if (typeof(T) == typeof(sbyte)) {
+            return (T)(object)(sbyte)input.ReadByte();
+         } else if (typeof(T) == typeof(short)) {
+            return (T)(object)(input.ReadByte() | (input.ReadByte() << 8));
+         } else if (typeof(T) == typeof(int)) {
+            return (T)(object)(input.ReadByte() | (input.ReadByte() << 8) | (input.ReadByte() << 16) | (input.ReadByte() << 24));
          } else if (typeof(T) == typeof(string)) {
             var length = input.ReadVariableInt();
             var buffer = input.ReadBytes(length);
@@ -25,6 +30,12 @@ namespace Dargon.Vox.Internals.Deserialization {
          if (typeof(T) == typeof(byte[])) {
             var count = input.ReadVariableInt();
             input.SkipBytes(count);
+         } else if (typeof(T) == typeof(sbyte)) {
+            input.SkipBytes(sizeof(sbyte));
+         } else if (typeof(T) == typeof(short)) {
+            input.SkipBytes(sizeof(short));
+         } else if (typeof(T) == typeof(int)) {
+            input.SkipBytes(sizeof(int));
          } else if (typeof(T) == typeof(string)) {
             var count = input.ReadVariableInt();
             input.SkipBytes(count);

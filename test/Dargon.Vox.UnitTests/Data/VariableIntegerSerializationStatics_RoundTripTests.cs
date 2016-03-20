@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Dargon.Commons;
+﻿using Dargon.Commons;
 using Dargon.Vox.Data;
 using NMockito;
+using System;
+using System.IO;
 using Xunit;
 
 namespace Dargon.Messages.Data {

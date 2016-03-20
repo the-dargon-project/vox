@@ -5,6 +5,7 @@
       void WriteBytes(int slot, byte[] bytes);
       void WriteBytes(int slot, byte[] bytes, int offset, int length);
 
+      void WriteNumeric(int slot, int val);
       void WriteString(int slot, string s);
       void WriteNull(int slot);
    }
