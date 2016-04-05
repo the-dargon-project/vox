@@ -1,21 +1,28 @@
 ﻿using System;
 using Dargon.Vox.Data;
 using Dargon.Vox.Internals.Serialization;
+using Dargon.Vox.Internals.TypePlaceholders;
 using Dargon.Vox.Slots;
 using Dargon.Vox.Utilities;
 
 namespace Dargon.Vox.Internals.Deserialization {
    public static class VoxObjectDeserializer {
-      private delegate object DeserializeFunc(ILengthLimitedForwardDataReader input);
+      private delegate object DeserializeFunc(Type type, ILengthLimitedForwardDataReader input);
 
-      private static readonly GenericFlyweightFactory<DeserializeFunc> objectBodyDeserializerByType
+      private static readonly IGenericFlyweightFactory<DeserializeFunc> objectBodyDeserializerByType
          = GenericFlyweightFactory.ForMethod<DeserializeFunc>(
             typeof(VoxObjectBodyDeserializerAndSkipper<>),
             nameof(VoxObjectBodyDeserializerAndSkipper<object>.Deserialize));
 
       public static object Deserialize(ILengthLimitedForwardDataReader input) {
          var type = input.ReadFullType();
-         return objectBodyDeserializerByType.Get(type)(input);
+         if (type == typeof(BoolTrue)) {
+            return true;
+         } else if (type == typeof(BoolFalse)) {
+            return false;
+         } else {
+            return objectBodyDeserializerByType.Get(type)(type, input);
+         }
       }
 
       public static unsafe T DeserializeNonpolymorphic<T>(ILengthLimitedForwardDataReader input) {
@@ -33,6 +40,22 @@ namespace Dargon.Vox.Internals.Deserialization {
 
       public class NonpolymorphicTypeMismatchException : Exception {
          public NonpolymorphicTypeMismatchException(string message) : base(message) { }
+      }
+
+      public class SpecialTypeReroutingGenericFlyweightFactory<T> : IGenericFlyweightFactory<T> {
+         private readonly IGenericFlyweightFactory<T> inner;
+
+         public SpecialTypeReroutingGenericFlyweightFactory(IGenericFlyweightFactory<T> inner) {
+            this.inner = inner;
+         }
+
+         public T Get(Type type) {
+            if (type == typeof(BoolTrue) || type == typeof(BoolFalse)) {
+               return inner.Get(typeof(bool));
+            } else {
+               return inner.Get(type);
+            }
+         }
       }
    }
 }

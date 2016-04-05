@@ -6,7 +6,7 @@ using Dargon.Commons;
 
 namespace Dargon.Vox.Utilities {
    public static class GenericFlyweightFactory {
-      public static GenericFlyweightFactory<TMethod> ForMethod<TMethod>(Type staticType, string methodName) {
+      public static IGenericFlyweightFactory<TMethod> ForMethod<TMethod>(Type staticType, string methodName) {
          if (staticType.IsGenericTypeDefinition) {
             return ForMethod_GivenTypeDefinition<TMethod>(staticType, methodName);
          } else {
@@ -14,8 +14,8 @@ namespace Dargon.Vox.Utilities {
          }
       }
 
-      private static GenericFlyweightFactory<TMethod> ForMethod_GivenTypeDefinition<TMethod>(Type staticTypeDefinition, string methodName) {
-         return new GenericFlyweightFactory<TMethod>(
+      private static IGenericFlyweightFactory<TMethod> ForMethod_GivenTypeDefinition<TMethod>(Type staticTypeDefinition, string methodName) {
+         return new GenericFlyweightFactoryImpl<TMethod>(
             t => {
                var staticType = staticTypeDefinition.MakeGenericType(t);
                var method = staticType.GetMethod(methodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
@@ -26,12 +26,12 @@ namespace Dargon.Vox.Utilities {
             });
       }
 
-      private static GenericFlyweightFactory<TMethod> ForMethod_GivenMethodDefinition<TMethod>(Type staticType, string methodName) {
+      private static IGenericFlyweightFactory<TMethod> ForMethod_GivenMethodDefinition<TMethod>(Type staticType, string methodName) {
          var methodDefinition = staticType.GetMethod(methodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
          if (methodDefinition == null) {
             throw new KeyNotFoundException($"Could not find method definition of name {methodName} in {staticType.FullName}");
          }
-         return new GenericFlyweightFactory<TMethod>(
+         return new GenericFlyweightFactoryImpl<TMethod>(
             t => {
                var method = methodDefinition.MakeGenericMethod(t);
                return CreateDelegateFromStaticMethodInfo<TMethod>(staticType, method);

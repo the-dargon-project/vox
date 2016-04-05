@@ -26,6 +26,11 @@ namespace Dargon.Vox.InternalTestUtils.Debugging {
          target.WriteBytes(slot, bytes, offset, length);
       }
 
+      public void WriteBoolean(int slot, bool val) {
+         Out(slot, "Write Boolean: " + val);
+         target.WriteBoolean(slot, val);
+      }
+
       public void WriteNumeric(int slot, int val) {
          Out(slot, "Write Numeric: " + val);
          target.WriteNumeric(slot, val);

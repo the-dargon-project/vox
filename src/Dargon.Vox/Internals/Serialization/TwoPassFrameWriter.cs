@@ -44,6 +44,8 @@ namespace Dargon.Vox.Internals.Serialization {
       public void WriteObject<U>(int slot, U subject) {
          if (typeof(U) == typeof(byte[])) {
             WriteBytes(slot, (byte[])(object)subject);
+         } else if (typeof(U) == typeof(bool)) {
+            WriteBoolean(slot, (bool)(object)subject);
          } else if (typeof(U) == typeof(sbyte)) {
             WriteNumeric(slot, (sbyte)(object)subject);
          } else if (typeof(U) == typeof(short)) {
@@ -94,6 +96,15 @@ namespace Dargon.Vox.Internals.Serialization {
             output.WriteTypeId(TypeId.ByteArray);
             output.WriteVariableInt(length);
             output.WriteBytes(bytes, offset, length);
+         }
+      }
+
+      public void WriteBoolean(int slot, bool val) {
+         var typeId = val ? TypeId.BoolTrue : TypeId.BoolFalse;
+         if (isDryPass) {
+            fakeWriter.Position += typeId.ComputeTypeIdLength();
+         } else {
+            output.WriteTypeId(typeId);
          }
       }
 

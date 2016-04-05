@@ -13,6 +13,8 @@ namespace Dargon.Vox.Internals.Deserialization {
          if (typeof(T) == typeof(byte[])) {
             var count = input.ReadVariableInt();
             return (T)(object)input.ReadBytes(count);
+         } else if (typeof(T) == typeof(bool)) {
+            throw new InvalidOperationException("Impossible case - should be handled in " + nameof(VoxObjectDeserializer));
          } else if (typeof(T) == typeof(sbyte)) {
             return (T)(object)(sbyte)input.ReadByte();
          } else if (typeof(T) == typeof(short)) {
@@ -39,6 +41,8 @@ namespace Dargon.Vox.Internals.Deserialization {
          if (typeof(T) == typeof(byte[])) {
             var count = input.ReadVariableInt();
             input.SkipBytes(count);
+         } else if (typeof(T) == typeof(bool) || typeof(T) == typeof(BoolFalse)) {
+            // no body
          } else if (typeof(T) == typeof(sbyte)) {
             input.SkipBytes(sizeof(sbyte));
          } else if (typeof(T) == typeof(short)) {

@@ -11,12 +11,12 @@ namespace Dargon.Vox.Internals {
    public static class AutoTypeSerializerFactory {
       private delegate void EmitterFunc(ILGenerator ilGenerator);
 
-      private static readonly GenericFlyweightFactory<EmitterFunc> emitWriteCallFuncs
+      private static readonly IGenericFlyweightFactory<EmitterFunc> emitWriteCallFuncs
          = GenericFlyweightFactory.ForMethod<EmitterFunc>(
             typeof(ReaderWriterCallHelper<>), nameof(ReaderWriterCallHelper<object>.EmitWrite));
 
 
-      private static readonly GenericFlyweightFactory<EmitterFunc> emitReadCallFuncs
+      private static readonly IGenericFlyweightFactory<EmitterFunc> emitReadCallFuncs
          = GenericFlyweightFactory.ForMethod<EmitterFunc>(
             typeof(ReaderWriterCallHelper<>), nameof(ReaderWriterCallHelper<object>.EmitRead));
 
@@ -100,6 +100,9 @@ namespace Dargon.Vox.Internals {
             if (typeof(T) == typeof(byte[])) {
                writerMethod = slotWriter.GetMethod(nameof(ISlotWriter.WriteBytes));
                readerMethod = slotReader.GetMethod(nameof(ISlotReader.ReadBytes));
+            } else if (typeof(T) == typeof(bool)) {
+               writerMethod = slotWriter.GetMethod(nameof(ISlotWriter.WriteBoolean));
+               readerMethod = slotReader.GetMethod(nameof(ISlotReader.ReadBoolean));
             } else if (typeof(T) == typeof(sbyte) || typeof(T) == typeof(short) || typeof(T) == typeof(int)) {
                writerMethod = slotWriter.GetMethod(nameof(ISlotWriter.WriteNumeric));
                readerMethod = slotReader.GetMethod(nameof(ISlotReader.ReadNumeric));

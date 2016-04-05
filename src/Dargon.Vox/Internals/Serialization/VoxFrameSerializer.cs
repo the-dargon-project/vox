@@ -7,7 +7,7 @@ namespace Dargon.Vox.Internals.Serialization {
    public static class VoxFrameSerializer {
       private delegate void NonpolymorphicSerializeFunction(object subject, Stream output, SerializerOptions options);
 
-      private static readonly GenericFlyweightFactory<NonpolymorphicSerializeFunction> serializeFactory
+      private static readonly IGenericFlyweightFactory<NonpolymorphicSerializeFunction> serializeFactory
          = GenericFlyweightFactory.ForMethod<NonpolymorphicSerializeFunction>(
             typeof(VoxFrameSerializer), nameof(SerializeNonpolymorphic));
 

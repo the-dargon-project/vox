@@ -7,6 +7,8 @@
       Int16                = -0x05,
       Int32                = -0x06,
       Guid                 = -0x08,
+      BoolTrue             = -0x09,
+      BoolFalse            = -0x0A,
 
       Null                 = -0x20,
       Void                 = -0x21,

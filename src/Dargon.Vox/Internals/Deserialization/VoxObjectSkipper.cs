@@ -5,7 +5,7 @@ namespace Dargon.Vox.Internals.Deserialization {
    public static class VoxObjectSkipper {
       private delegate void SkipFunc(ILengthLimitedForwardDataReader input);
 
-      private static readonly GenericFlyweightFactory<SkipFunc> objectBodySkipperByType
+      private static readonly IGenericFlyweightFactory<SkipFunc> objectBodySkipperByType
          = GenericFlyweightFactory.ForMethod<SkipFunc>(
             typeof(VoxObjectBodyDeserializerAndSkipper<>),
             nameof(VoxObjectBodyDeserializerAndSkipper<object>.Skip));

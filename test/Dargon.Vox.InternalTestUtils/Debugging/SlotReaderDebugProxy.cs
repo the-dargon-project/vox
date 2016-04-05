@@ -12,6 +12,7 @@ namespace Dargon.Vox.InternalTestUtils.Debugging {
       public object ReadObject(int slot) => ProxyResult(slot, "Read Object", target.ReadObject);
       public T ReadObject<T>(int slot) => ProxyResult(slot, "Read Object of Type " + typeof(T).FullName, target.ReadObject<T>);
       public byte[] ReadBytes(int slot) => ProxyResult(slot, "Read Bytes", target.ReadBytes, arr => arr.Length + " bytes");
+      public bool ReadBoolean(int slot) => ProxyResult(slot, "Read Boolean", target.ReadBoolean);
       public int ReadNumeric(int slot) => ProxyResult(slot, "Read Numeric", target.ReadNumeric);
       public string ReadString(int slot) => ProxyResult(slot, "Read String", target.ReadString);
       public Guid ReadGuid(int slot) => ProxyResult(slot, "Read Guid", target.ReadGuid);

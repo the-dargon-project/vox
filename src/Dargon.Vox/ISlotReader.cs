@@ -7,6 +7,7 @@ namespace Dargon.Vox {
 
       byte[] ReadBytes(int slot);
 
+      bool ReadBoolean(int slot);
       int ReadNumeric(int slot);
       string ReadString(int slot);
       Guid ReadGuid(int slot);

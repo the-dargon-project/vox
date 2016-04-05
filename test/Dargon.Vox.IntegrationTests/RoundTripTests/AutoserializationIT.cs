@@ -9,6 +9,8 @@ namespace Dargon.Vox.RoundTripTests {
       public void Hodgepodge() {
          TestTypeRegistrationHelpers.RegisterWithSerializer<HodgepodgeDto>();
          RoundTripTest.Run(new HodgepodgeDto {
+            True = true,
+            False = false,
             Int8 = CreatePlaceholder<sbyte>(),
             Int16 = CreatePlaceholder<short>(),
             Int32 = CreatePlaceholder<int>(),
@@ -39,6 +41,8 @@ namespace Dargon.Vox.RoundTripTests {
       }
 
       internal class HodgepodgeDto {
+         public bool True { get; set; }
+         public bool False { get; set; }
          public sbyte Int8 { get; set; }
          public short Int16 { get; set; }
          public int Int32 { get; set; }
@@ -48,6 +52,8 @@ namespace Dargon.Vox.RoundTripTests {
          public override bool Equals(object obj) => Equals(obj as HodgepodgeDto);
 
          public bool Equals(HodgepodgeDto o) => o != null &&
+                                                True == o.True &&
+                                                False == o.False &&
                                                 Int8 == o.Int8 &&
                                                 Int16 == o.Int16 &&
                                                 Int32 == o.Int32 &&
