@@ -70,7 +70,7 @@ namespace Dargon.Vox.Internals.Deserialization {
             var typeId = typeIds[i];
             var type = TypeRegistry.Lookup(typeId);
             if (type.IsGenericTypeDefinition) {
-               var genericArgs = type.GenericTypeArguments.Map(s.Pop);
+               var genericArgs = type.GetGenericArguments().Map(s.Pop);
                s.Push(type.MakeGenericType(genericArgs));
             } else {
                s.Push(type);

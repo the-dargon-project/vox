@@ -1,6 +1,6 @@
-﻿using System;
-using Dargon.Vox.InternalTestUtils;
+﻿using Dargon.Vox.InternalTestUtils;
 using NMockito;
+using System;
 using Xunit;
 
 namespace Dargon.Vox.RoundTripTests {
@@ -20,23 +20,23 @@ namespace Dargon.Vox.RoundTripTests {
       }
 
       [Fact]
-      public void LinkedList_SingleNode() {
-         LinkedList_RunTest(new StringLinkedListNode(CreatePlaceholder<string>()));
+      public void LinkedList_String_SingleNode() {
+         LinkedList_RunTest(new LinkedListNode<string>(CreatePlaceholder<string>()));
       }
 
       [Fact]
-      public void LinkedList_Chain() {
+      public void LinkedList_String_Chain() {
          LinkedList_RunTest(
-            new StringLinkedListNode(
+            new LinkedListNode<string>(
                CreatePlaceholder<string>(),
-               new StringLinkedListNode(
+               new LinkedListNode<string>(
                   CreatePlaceholder<string>(),
-                  new StringLinkedListNode(
+                  new LinkedListNode<string>(
                      CreatePlaceholder<string>()))));
       }
 
-      private void LinkedList_RunTest(StringLinkedListNode node) {
-         TestTypeRegistrationHelpers.RegisterWithSerializer<StringLinkedListNode>();
+      private void LinkedList_RunTest<T>(LinkedListNode<T> node) {
+         TestTypeRegistrationHelpers.Register(typeof(LinkedListNode<>));
          RoundTripTest.Run(node);
       }
 
@@ -61,21 +61,22 @@ namespace Dargon.Vox.RoundTripTests {
                                                 Guid.Equals(o.Guid);
       }
 
-      internal class StringLinkedListNode {
-         public string Value { get; set; }
-         public StringLinkedListNode Next { get; set; }
+      [AutoSerializable]
+      internal class LinkedListNode<T> {
+         public T Value { get; set; }
+         public LinkedListNode<T> Next { get; set; }
 
-         public StringLinkedListNode() { }
+         public LinkedListNode() { }
 
-         public StringLinkedListNode(string value, StringLinkedListNode next = null) {
+         public LinkedListNode(T value, LinkedListNode<T> next = null) {
             Value = value;
             Next = next;
          }
 
          public override bool Equals(object obj) {
-            var other = obj as StringLinkedListNode;
+            var other = obj as LinkedListNode<T>;
             return other != null &&
-                   Value == other.Value &&
+                   Value.Equals(other.Value) &&
                    Equals(Next, other.Next);
          }
       }

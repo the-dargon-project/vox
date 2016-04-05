@@ -8,20 +8,24 @@ namespace Dargon.Vox.InternalTestUtils {
       private static readonly ConcurrentDictionary<Type, int> typeIdsByType = new ConcurrentDictionary<Type, int>();
       private static int typeIdCounter = 1;
 
-      public static void RegisterWithSerializer<T>(ITypeSerializer<T> serializer = null) {
+      public static void Register(Type type) {
          typeIdsByType.GetOrAdd(
-            typeof(T),
+            type,
             add => {
                var typeId = Interlocked.Increment(ref typeIdCounter);
-               TypeRegistry.RegisterType((TypeId)typeId, typeof(T));
-               if (serializer == null) {
-                  serializer = (ITypeSerializer<T>)AutoTypeSerializerFactory.Create(typeof(T));
-               }
-               typeof(TypeSerializerRegistry<>).MakeGenericType(typeof(T))
-                                               .GetMethod(nameof(TypeSerializerRegistry<object>.Register))
-                                               .Invoke(null, new object [] { serializer });
+               TypeRegistry.RegisterType((TypeId)typeId, type);
                return typeId;
             });
+      }
+
+      public static void RegisterWithSerializer<T>(ITypeSerializer<T> serializer = null) {
+         Register(typeof(T));
+         if (serializer == null) {
+            serializer = (ITypeSerializer<T>)AutoTypeSerializerFactory.Create(typeof(T));
+         }
+         typeof(TypeSerializerRegistry<>).MakeGenericType(typeof(T))
+                                         .GetMethod(nameof(TypeSerializerRegistry<object>.Register))
+                                         .Invoke(null, new object[] { serializer });
       }
    }
 }
