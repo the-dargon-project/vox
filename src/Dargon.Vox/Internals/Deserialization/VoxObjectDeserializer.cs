@@ -7,7 +7,7 @@ using Dargon.Vox.Utilities;
 
 namespace Dargon.Vox.Internals.Deserialization {
    public static class VoxObjectDeserializer {
-      private delegate object DeserializeFunc(Type type, ILengthLimitedForwardDataReader input);
+      private delegate object DeserializeFunc(ILengthLimitedForwardDataReader input);
 
       private static readonly IGenericFlyweightFactory<DeserializeFunc> objectBodyDeserializerByType
          = GenericFlyweightFactory.ForMethod<DeserializeFunc>(
@@ -21,7 +21,7 @@ namespace Dargon.Vox.Internals.Deserialization {
          } else if (type == typeof(BoolFalse)) {
             return false;
          } else {
-            return objectBodyDeserializerByType.Get(type)(type, input);
+            return objectBodyDeserializerByType.Get(type)(input);
          }
       }
 
