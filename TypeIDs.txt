@@ -11,6 +11,8 @@ Useful Reserved tIds: [-0x01, -0x40]
 -0x06 - int
 -0x07 - long
 -0x08 - guid
+-0x09 - bool: TRUE
+-0x0A - bool: FALSE
 
 -0x20 - null
 -0x21 - void (DNE, Empty Slot)
