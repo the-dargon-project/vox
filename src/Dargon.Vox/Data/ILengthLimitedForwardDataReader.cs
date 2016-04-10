@@ -1,4 +1,3 @@
 namespace Dargon.Vox.Data {
-   public interface ILengthLimitedForwardDataReader : IForwardDataReader, ILengthLimitedAdapter {
-   }
+   public interface ILengthLimitedForwardDataReader : IForwardDataReader, ILengthLimitedAdapter { }
 }
