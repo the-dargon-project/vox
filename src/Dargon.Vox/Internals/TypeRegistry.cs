@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Dargon.Commons.Collections;
 using Dargon.Vox.Internals.TypePlaceholders;
+using Dargon.Vox.Internals.TypePlaceholders.Boxes;
 using Dargon.Vox.Utilities;
 
 namespace Dargon.Vox.Internals {
@@ -20,7 +21,8 @@ namespace Dargon.Vox.Internals {
             [TypeId.BoolFalse] = typeof(BoolFalse),
             [TypeId.String] = typeof(string),
             [TypeId.Guid] = typeof(Guid),
-            [TypeId.Null] = typeof(NullType)
+            [TypeId.Null] = typeof(NullType),
+            [TypeId.Collection] = typeof(IEnumerableBox<>),
          });
       }
 

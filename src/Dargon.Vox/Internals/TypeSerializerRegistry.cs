@@ -12,10 +12,14 @@ namespace Dargon.Vox.Internals {
       private static ITypeSerializer<T> GetSerializer() {
          if (serializer == null) {
             lock (synchronization) {
-               if (typeof(T).GetAttributeOrNull<AutoSerializableAttribute>() == null) {
-                  throw new KeyNotFoundException("No serializer for type " + typeof(T).FullName + " registered.");
-               } else {
+               if (typeof(T).GetAttributeOrNull<AutoSerializableAttribute>() != null) {
                   serializer = AutoTypeSerializerFactory.Create<T>();
+               } else if (typeof(ISerializableType).IsAssignableFrom(typeof(T))) {
+                  serializer = new InlineTypeSerializer<T>(
+                     (writer, t) => ((ISerializableType)t).Serialize(writer),
+                     (reader, t) => ((ISerializableType)t).Deserialize(reader));
+               } else {
+                  throw new KeyNotFoundException("No serializer for type " + typeof(T).FullName + " registered.");
                }
             }
          }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Dargon.Vox.InternalTestUtils.Debugging {
    public class NullSlotReader : ISlotReader {
@@ -10,5 +11,8 @@ namespace Dargon.Vox.InternalTestUtils.Debugging {
       public string ReadString(int slot) => null;
       public Guid ReadGuid(int slot) => Guid.Empty;
       public object ReadNull(int slot) => null;
+      public TCollection ReadCollection<TElement, TCollection>(int slot) where TCollection : IEnumerable<TElement> {
+         return default(TCollection);
+      }
    }
 }

@@ -9,7 +9,7 @@ namespace Dargon.Vox.Internals.Serialization {
 
       private static readonly IGenericFlyweightFactory<NonpolymorphicSerializeFunction> serializeFactory
          = GenericFlyweightFactory.ForMethod<NonpolymorphicSerializeFunction>(
-            typeof(VoxFrameSerializer), nameof(SerializeNonpolymorphic));
+            typeof(VoxFrameSerializer), nameof(SerializeNonpolymorphicStream));
 
       [ThreadStatic] private static ReusableStreamToForwardDataWriterAdapter _streamAdapter;
       [ThreadStatic] private static ReusableLengthLimitedBufferToForwardDataWriterAdapter _bufferAdapter;
@@ -18,13 +18,13 @@ namespace Dargon.Vox.Internals.Serialization {
          serializeFactory.Get(subject.GetType())(subject, output, options);
       }
 
-      public static void SerializeNonpolymorphic<T>(object subject, Stream output, SerializerOptions options) {
+      public static void SerializeNonpolymorphicStream<T>(object subject, Stream output, SerializerOptions options) {
          _streamAdapter = _streamAdapter ?? new ReusableStreamToForwardDataWriterAdapter();
          _streamAdapter.SetTarget(output);
          VoxFrameSerializer<T>.SerializeNonpolymorphic((T)subject, _streamAdapter, options);
       }
 
-      public static void SerializeNonpolymorphic<T>(object subject, byte[] output, int offset, int length, SerializerOptions options) {
+      public static void SerializeNonpolymorphicBuffer<T>(object subject, byte[] output, int offset, int length, SerializerOptions options) {
          _bufferAdapter = _bufferAdapter ?? new ReusableLengthLimitedBufferToForwardDataWriterAdapter();
          _bufferAdapter.SetTarget(output);
          _bufferAdapter.SetOffset(offset);

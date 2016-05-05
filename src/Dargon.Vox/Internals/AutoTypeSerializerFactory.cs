@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -112,6 +113,14 @@ namespace Dargon.Vox.Internals {
             } else if (typeof(T) == typeof(string)) {
                writerMethod = slotWriter.GetMethod(nameof(ISlotWriter.WriteString));
                readerMethod = slotReader.GetMethod(nameof(ISlotReader.ReadString));
+            } else if (typeof(IEnumerable).IsAssignableFrom(typeof(T))) {
+               var elementType = typeof(T).GetInterfaces()
+                                          .First(i => i.Name.Contains(nameof(IEnumerable)) && i.IsGenericType)
+                                          .GenericTypeArguments[0];
+               writerMethod = slotWriter.GetMethod(nameof(ISlotWriter.WriteCollection))
+                                        .MakeGenericMethod(elementType, typeof(T));
+               readerMethod = slotReader.GetMethod(nameof(ISlotReader.ReadCollection))
+                                        .MakeGenericMethod(elementType, typeof(T));
             } else {
                writerMethod = slotWriter.GetMethods()
                                         .First(m => m.Name == nameof(ISlotWriter.WriteObject))

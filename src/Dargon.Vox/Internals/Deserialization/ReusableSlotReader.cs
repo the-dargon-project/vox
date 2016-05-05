@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using Dargon.Vox.Data;
 using Dargon.Vox.Internals.TypePlaceholders;
+using Dargon.Vox.Internals.TypePlaceholders.Boxes;
 using Dargon.Vox.Slots;
 
 namespace Dargon.Vox.Internals.Deserialization {
@@ -18,7 +20,16 @@ namespace Dargon.Vox.Internals.Deserialization {
          return VoxObjectDeserializer.Deserialize(_reader);
       }
 
-      public T ReadObject<T>(int slot) => ReadNonpolymorphicHelper<T>(slot);
+      public T ReadObject<T>(int slot) {
+         if (typeof(T) == typeof(int)) {
+            return (T)(object)ReadNumeric(slot);
+         } else if (typeof(T) == typeof(bool)) {
+            return (T)(object)ReadBoolean(slot);
+         } else {
+            return ReadNonpolymorphicHelper<T>(slot);
+         }
+      }
+
       public byte[] ReadBytes(int slot) => ReadNonpolymorphicHelper<byte[]>(slot);
       public bool ReadBoolean(int slot) {
          AdvanceUntil(slot);
@@ -47,6 +58,15 @@ namespace Dargon.Vox.Internals.Deserialization {
       public string ReadString(int slot) => ReadNonpolymorphicHelper<string>(slot);
       public Guid ReadGuid(int slot) => ReadNonpolymorphicHelper<Guid>(slot);
       public object ReadNull(int slot) => ReadNonpolymorphicHelper<NullType>(slot);
+
+      public TCollection ReadCollection<TElement, TCollection>(int slot) where TCollection : IEnumerable<TElement> {
+         var box = ReadNonpolymorphicHelper<IEnumerableBox<TElement>>(slot);
+         var result = box.Unbox();
+         if (result.GetType() != typeof(TCollection)) {
+            result = Activator.CreateInstance(typeof(TCollection), result);
+         }
+         return (TCollection)result;
+      }
 
       private T ReadNonpolymorphicHelper<T>(int slot) {
          AdvanceUntil(slot);

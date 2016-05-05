@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Dargon.Vox.InternalTestUtils.Debugging {
    public class SlotReaderDebugProxy : ISlotReader {
@@ -17,6 +18,7 @@ namespace Dargon.Vox.InternalTestUtils.Debugging {
       public string ReadString(int slot) => ProxyResult(slot, "Read String", target.ReadString);
       public Guid ReadGuid(int slot) => ProxyResult(slot, "Read Guid", target.ReadGuid);
       public object ReadNull(int slot) => ProxyResult(slot, "Read Null", target.ReadNull);
+      public TCollection ReadCollection<TElement, TCollection>(int slot) where TCollection : IEnumerable<TElement> => ProxyResult(slot, "Read Collection", target.ReadCollection<TElement, TCollection>);
 
       private T ProxyResult<T>(int slot, string desc, Func<int, T> func, Func<T, string> stringify = null) {
          Out(slot, desc);

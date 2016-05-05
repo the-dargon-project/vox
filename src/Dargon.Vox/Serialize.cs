@@ -9,13 +9,13 @@ namespace Dargon.Vox {
       private static readonly SerializerOptions defaultSerializerOptions = new SerializerOptions();
 
       public static void To<T>(Stream target, T what) {
-         VoxFrameSerializer.SerializeNonpolymorphic<T>(what, target, defaultSerializerOptions);
+         VoxFrameSerializer.SerializeNonpolymorphicStream<T>(what, target, defaultSerializerOptions);
       }
 
       public static void To<T>(byte[] target, T what) => To(target, 0, target.Length, what);
 
       public static void To<T>(byte[] target, int offset, int length, T what) {
-         VoxFrameSerializer.SerializeNonpolymorphic<T>(what, target, offset, length, defaultSerializerOptions);
+         VoxFrameSerializer.SerializeNonpolymorphicBuffer<T>(what, target, offset, length, defaultSerializerOptions);
       }
    }
 

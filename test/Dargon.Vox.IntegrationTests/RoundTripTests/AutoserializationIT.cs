@@ -1,6 +1,8 @@
 ﻿using Dargon.Vox.InternalTestUtils;
 using NMockito;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Xunit;
 
 namespace Dargon.Vox.RoundTripTests {
@@ -15,7 +17,8 @@ namespace Dargon.Vox.RoundTripTests {
             Int16 = CreatePlaceholder<short>(),
             Int32 = CreatePlaceholder<int>(),
             String = CreatePlaceholder<string>(),
-            Guid = CreatePlaceholder<Guid>()
+            Guid = CreatePlaceholder<Guid>(),
+            IntList = new List<int>(Enumerable.Range(1, 1337)),
          });
       }
 
@@ -48,6 +51,7 @@ namespace Dargon.Vox.RoundTripTests {
          public int Int32 { get; set; }
          public string String { get; set; }
          public Guid Guid { get; set; }
+         public List<int> IntList { get; set; } 
 
          public override bool Equals(object obj) => Equals(obj as HodgepodgeDto);
 
@@ -58,7 +62,8 @@ namespace Dargon.Vox.RoundTripTests {
                                                 Int16 == o.Int16 &&
                                                 Int32 == o.Int32 &&
                                                 Equals(String, o.String) &&
-                                                Guid.Equals(o.Guid);
+                                                Guid.Equals(o.Guid) &&
+                                                IntList.SequenceEqual(o.IntList);
       }
 
       [AutoSerializable]

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Dargon.Vox {
    public interface ISlotReader {
@@ -12,5 +13,7 @@ namespace Dargon.Vox {
       string ReadString(int slot);
       Guid ReadGuid(int slot);
       object ReadNull(int slot);
+
+      TCollection ReadCollection<TElement, TCollection>(int slot) where TCollection : IEnumerable<TElement>;
    }
 }

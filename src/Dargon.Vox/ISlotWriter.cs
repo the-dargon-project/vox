@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Dargon.Vox {
    public interface ISlotWriter {
@@ -12,5 +13,6 @@ namespace Dargon.Vox {
       void WriteGuid(int slot, Guid guid);
       void WriteString(int slot, string s);
       void WriteNull(int slot);
+      void WriteCollection<TElement, TCollection>(int slot, TCollection collection) where TCollection : IEnumerable<TElement>;
    }
 }

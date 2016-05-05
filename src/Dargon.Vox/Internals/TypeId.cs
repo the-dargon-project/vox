@@ -15,6 +15,8 @@
 
       ObjectEnd            = -0x32,
       GenericTypeIdBegin   = -0x33,
-      GenericTypeIdEnd     = -0x34
+      GenericTypeIdEnd     = -0x34,
+
+      Collection           = -0x40,
    }
 }

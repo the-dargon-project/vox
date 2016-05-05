@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace Dargon.Vox.InternalTestUtils.Debugging {
    public class NullSlotWriter : ISlotWriter {
@@ -10,5 +11,6 @@ namespace Dargon.Vox.InternalTestUtils.Debugging {
       public void WriteString(int slot, string s) {}
       public void WriteGuid(int slot, Guid guid) {}
       public void WriteNull(int slot) {}
+      public void WriteCollection<TElement, TCollection>(int slot, TCollection collection) where TCollection : IEnumerable<TElement> {}
    }
 }

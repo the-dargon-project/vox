@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 using Dargon.Vox.Data;
+using Dargon.Vox.Internals.TypePlaceholders.Boxes;
 
 namespace Dargon.Vox.Internals.Serialization {
    public class TwoPassFrameWriter<T> : ISlotWriter {
@@ -192,6 +193,11 @@ namespace Dargon.Vox.Internals.Serialization {
          } else {
             output.WriteTypeId(TypeId.Null);
          }
+      }
+
+      public void WriteCollection<TElement, TCollection>(int slot, TCollection collection) where TCollection : IEnumerable<TElement> {
+         if (typeof(TCollection))
+         WriteObject(slot, new IEnumerableBox<TElement>(collection));
       }
 
       private void EnsureSize(ref byte[] buffer, int length) {
