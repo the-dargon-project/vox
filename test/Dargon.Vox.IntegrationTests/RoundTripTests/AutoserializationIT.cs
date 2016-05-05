@@ -18,7 +18,8 @@ namespace Dargon.Vox.RoundTripTests {
             Int32 = CreatePlaceholder<int>(),
             String = CreatePlaceholder<string>(),
             Guid = CreatePlaceholder<Guid>(),
-            IntList = new List<int>(Enumerable.Range(1, 1337)),
+            IntList = CreatePlaceholder<List<int>>(),
+            StringArray = CreatePlaceholder<string[]>(),
          });
       }
 
@@ -52,6 +53,7 @@ namespace Dargon.Vox.RoundTripTests {
          public string String { get; set; }
          public Guid Guid { get; set; }
          public List<int> IntList { get; set; } 
+         public string[] StringArray { get; set; }
 
          public override bool Equals(object obj) => Equals(obj as HodgepodgeDto);
 
@@ -63,7 +65,8 @@ namespace Dargon.Vox.RoundTripTests {
                                                 Int32 == o.Int32 &&
                                                 Equals(String, o.String) &&
                                                 Guid.Equals(o.Guid) &&
-                                                IntList.SequenceEqual(o.IntList);
+                                                IntList.SequenceEqual(o.IntList) &&
+                                                StringArray.SequenceEqual(o.StringArray);
       }
 
       [AutoSerializable]

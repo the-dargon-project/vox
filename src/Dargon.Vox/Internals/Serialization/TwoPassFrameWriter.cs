@@ -7,7 +7,7 @@ using Dargon.Vox.Internals.TypePlaceholders.Boxes;
 
 namespace Dargon.Vox.Internals.Serialization {
    public class TwoPassFrameWriter<T> : ISlotWriter {
-      private readonly Stack<int> objectLengthStack = new Stack<int>();
+      private readonly ObjectLengthCollection objectLengthCollection = new ObjectLengthCollection();
       private readonly Queue<int> stringLengthQueue = new Queue<int>(); 
       private readonly FakeForwardDataWriter fakeWriter = new FakeForwardDataWriter();
       private bool isDryPass;
@@ -19,11 +19,11 @@ namespace Dargon.Vox.Internals.Serialization {
          WriteObject<T>(0, subject);
          PrepareRealPass(writer);
          WriteObject<T>(0, subject);
-         Trace.Assert(objectLengthStack.Count == 0);
+         Trace.Assert(objectLengthCollection.Count == 0);
       }
 
       private void PrepareDryPass() {
-         objectLengthStack.Clear();
+         objectLengthCollection.Clear();
          isDryPass = true;
          output = fakeWriter;
          fakeWriter.Position = 0;
@@ -69,15 +69,16 @@ namespace Dargon.Vox.Internals.Serialization {
 
       public void WriteCustomObject<U>(int slot, U subject) {
          if (isDryPass) {
+            var lengthIndex = objectLengthCollection.Reserve();
             int savedWriterPosition = fakeWriter.Position;
             TypeSerializerRegistry<U>.Serializer.Serialize(this, subject);
             var length = fakeWriter.Position - savedWriterPosition;
-            objectLengthStack.Push(length);
+            objectLengthCollection.Put(lengthIndex, length);
             fakeWriter.Position += FullTypeToBinaryRepresentationCache<U>.Serialization.Length;
             fakeWriter.Position += length.ComputeVariableIntLength();
          } else {
             output.WriteBytes(FullTypeToBinaryRepresentationCache<U>.Serialization);
-            output.WriteVariableInt(objectLengthStack.Pop());
+            output.WriteVariableInt(objectLengthCollection.Take());
             TypeSerializerRegistry<U>.Serializer.Serialize(this, subject);
          }
       }
@@ -196,8 +197,11 @@ namespace Dargon.Vox.Internals.Serialization {
       }
 
       public void WriteCollection<TElement, TCollection>(int slot, TCollection collection) where TCollection : IEnumerable<TElement> {
-         if (typeof(TCollection))
-         WriteObject(slot, new IEnumerableBox<TElement>(collection));
+         if (collection == null) {
+            WriteNull(slot);
+         } else {
+            WriteObject(slot, new IArrayBox<TElement>(collection));
+         }
       }
 
       private void EnsureSize(ref byte[] buffer, int length) {
@@ -212,6 +216,27 @@ namespace Dargon.Vox.Internals.Serialization {
          public void WriteByte(byte val) => Position++;
          public void WriteBytes(byte[] val) => WriteBytes(val, 0, val.Length);
          public void WriteBytes(byte[] val, int offset, int length) => Position += length;
+      }
+
+      private class ObjectLengthCollection {
+         private readonly List<int> storage = new List<int>();
+         private int nextTakenIndex;
+
+         public int Count => storage.Count - nextTakenIndex;
+
+         public void Clear() {
+            storage.Clear();
+            nextTakenIndex = 0;
+         }
+
+         public int Reserve() {
+            int index = storage.Count;
+            storage.Add(int.MinValue);
+            return index;
+         }
+
+         public void Put(int index, int size) => storage[index] = size;
+         public int Take() => storage[nextTakenIndex++];
       }
    }
 }

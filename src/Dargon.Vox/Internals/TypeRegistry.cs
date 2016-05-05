@@ -22,7 +22,7 @@ namespace Dargon.Vox.Internals {
             [TypeId.String] = typeof(string),
             [TypeId.Guid] = typeof(Guid),
             [TypeId.Null] = typeof(NullType),
-            [TypeId.Collection] = typeof(IEnumerableBox<>),
+            [TypeId.Collection] = typeof(IArrayBox<>),
          });
       }
 

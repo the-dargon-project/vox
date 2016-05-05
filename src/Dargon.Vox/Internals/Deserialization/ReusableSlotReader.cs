@@ -60,7 +60,7 @@ namespace Dargon.Vox.Internals.Deserialization {
       public object ReadNull(int slot) => ReadNonpolymorphicHelper<NullType>(slot);
 
       public TCollection ReadCollection<TElement, TCollection>(int slot) where TCollection : IEnumerable<TElement> {
-         var box = ReadNonpolymorphicHelper<IEnumerableBox<TElement>>(slot);
+         var box = ReadNonpolymorphicHelper<IArrayBox<TElement>>(slot);
          var result = box.Unbox();
          if (result.GetType() != typeof(TCollection)) {
             result = Activator.CreateInstance(typeof(TCollection), result);

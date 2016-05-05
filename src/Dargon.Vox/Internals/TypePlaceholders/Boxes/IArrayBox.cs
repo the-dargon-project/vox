@@ -4,12 +4,12 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace Dargon.Vox.Internals.TypePlaceholders.Boxes {
-   public class IEnumerableBox<TElement> : ISerializableType, ISerializationBox {
+   public class IArrayBox<TElement> : ISerializableType, ISerializationBox {
       private IEnumerable<TElement> inner;
 
-      public IEnumerableBox() {}
+      public IArrayBox() {}
 
-      public IEnumerableBox(IEnumerable enumerable) {
+      public IArrayBox(IEnumerable enumerable) {
          inner = enumerable.Cast<TElement>();
       }
 
