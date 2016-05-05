@@ -2,14 +2,15 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace Dargon.Vox.Internals.TypePlaceholders.Boxes {
-   public class IArrayBox<TElement> : ISerializableType, ISerializationBox {
+   public class ArrayBox<TElement> : ISerializableType, ISerializationBox {
       private IEnumerable<TElement> inner;
 
-      public IArrayBox() {}
+      public ArrayBox() {}
 
-      public IArrayBox(IEnumerable enumerable) {
+      public ArrayBox(IEnumerable enumerable) {
          inner = enumerable.Cast<TElement>();
       }
 

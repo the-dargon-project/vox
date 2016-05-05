@@ -20,6 +20,7 @@ namespace Dargon.Vox.RoundTripTests {
             Guid = CreatePlaceholder<Guid>(),
             IntList = CreatePlaceholder<List<int>>(),
             StringArray = CreatePlaceholder<string[]>(),
+            IntStringMap = CreatePlaceholder<Dictionary<int, string>>(),
          });
       }
 
@@ -54,6 +55,7 @@ namespace Dargon.Vox.RoundTripTests {
          public Guid Guid { get; set; }
          public List<int> IntList { get; set; } 
          public string[] StringArray { get; set; }
+         public Dictionary<int, string> IntStringMap { get; set; }
 
          public override bool Equals(object obj) => Equals(obj as HodgepodgeDto);
 
@@ -66,7 +68,9 @@ namespace Dargon.Vox.RoundTripTests {
                                                 Equals(String, o.String) &&
                                                 Guid.Equals(o.Guid) &&
                                                 IntList.SequenceEqual(o.IntList) &&
-                                                StringArray.SequenceEqual(o.StringArray);
+                                                StringArray.SequenceEqual(o.StringArray) &&
+                                                IntStringMap.Count == o.IntStringMap.Count &&
+                                                IntStringMap.All(kvp => o.IntStringMap[kvp.Key] == kvp.Value);
       }
 
       [AutoSerializable]

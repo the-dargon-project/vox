@@ -1,9 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using Dargon.Vox.Data;
+﻿using Dargon.Vox.Data;
 using Dargon.Vox.Internals.TypePlaceholders;
 using Dargon.Vox.Internals.TypePlaceholders.Boxes;
 using Dargon.Vox.Slots;
+using Dargon.Vox.Utilities;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Reflection.Emit;
 
 namespace Dargon.Vox.Internals.Deserialization {
    public class ReusableSlotReader : ISlotReader {
@@ -60,12 +64,28 @@ namespace Dargon.Vox.Internals.Deserialization {
       public object ReadNull(int slot) => ReadNonpolymorphicHelper<NullType>(slot);
 
       public TCollection ReadCollection<TElement, TCollection>(int slot) where TCollection : IEnumerable<TElement> {
-         var box = ReadNonpolymorphicHelper<IArrayBox<TElement>>(slot);
-         var result = box.Unbox();
-         if (result.GetType() != typeof(TCollection)) {
-            result = Activator.CreateInstance(typeof(TCollection), result);
+         ISerializationBox box;
+         if (GenericTypeUnpacker<TElement>.Definition == typeof(KeyValuePair<,>)) {
+            box = ReadNonpolymorphicHelperMapBoxVisitor<TElement>.Visit(this, slot);
+         } else {
+            box = ReadNonpolymorphicHelper<ArrayBox<TElement>>(slot);
          }
-         return (TCollection)result;
+         var elements = (TElement[])box.Unbox();
+         if (typeof(TCollection) == typeof(TElement[])) {
+            return (TCollection)(object)elements;
+         }
+         var constructor = typeof(TCollection).GetConstructor(new[] { typeof(IEnumerable<TElement>) });
+         if (constructor != null) {
+            return (TCollection)Activator.CreateInstance(typeof(TCollection), elements);
+         }
+         var type = typeof(TCollection);
+         var instance = (TCollection)Activator.CreateInstance(typeof(TCollection));
+         var add = type.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+                       .FirstOrDefault(m => m.Name.Contains("Add") && m.GetParameters().Length == 1) ?? type.GetMethod("Enqueue");
+         foreach (var element in elements) {
+            add.Invoke(instance, new object[] { element });
+         }
+         return instance;
       }
 
       private T ReadNonpolymorphicHelper<T>(int slot) {
@@ -79,6 +99,31 @@ namespace Dargon.Vox.Internals.Deserialization {
             _nextSlot++;
          }
          _nextSlot++;
+      }
+
+      private static class ReadNonpolymorphicHelperMapBoxVisitor<TKeyValuePair> {
+         private delegate ISerializationBox InvokerFunc(ReusableSlotReader reader, int slot);
+
+         private static readonly InvokerFunc invoker;
+
+         static ReadNonpolymorphicHelperMapBoxVisitor() {
+            var method = new DynamicMethod(
+               "mapbox_read_visitor_" + typeof(TKeyValuePair).Name,
+               typeof(ISerializationBox), new[] { typeof(ReusableSlotReader), typeof(int) },
+               typeof(ReusableSlotReader), true);
+            var emitter = method.GetILGenerator();
+            var mapBoxType = GenericTypeUnpacker<TKeyValuePair>.Build(typeof(MapBox<,>));
+            var readNonpolymorphicHelperMethod = typeof(ReusableSlotReader).GetMethod("ReadNonpolymorphicHelper", BindingFlags.Instance | BindingFlags.NonPublic)
+                                                                           .MakeGenericMethod(mapBoxType);
+            emitter.Emit(OpCodes.Ldarg_0);
+            emitter.Emit(OpCodes.Ldarg_1);
+            emitter.Emit(OpCodes.Call, readNonpolymorphicHelperMethod);
+            emitter.Emit(OpCodes.Ret);
+
+            invoker = (InvokerFunc)method.CreateDelegate(typeof(InvokerFunc));
+         }
+
+         public static ISerializationBox Visit(ReusableSlotReader reader, int slot) => invoker(reader, slot);
       }
    }
 }

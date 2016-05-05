@@ -1,9 +1,13 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using System.Reflection.Emit;
 using System.Text;
 using Dargon.Vox.Data;
 using Dargon.Vox.Internals.TypePlaceholders.Boxes;
+using Dargon.Vox.Utilities;
 
 namespace Dargon.Vox.Internals.Serialization {
    public class TwoPassFrameWriter<T> : ISlotWriter {
@@ -13,6 +17,7 @@ namespace Dargon.Vox.Internals.Serialization {
       private bool isDryPass;
       private IForwardDataWriter output;
       private byte[] stringBuffer = new byte[16];
+      
 
       public void RunPasses(T subject, IForwardDataWriter writer) {
          PrepareDryPass();
@@ -199,8 +204,10 @@ namespace Dargon.Vox.Internals.Serialization {
       public void WriteCollection<TElement, TCollection>(int slot, TCollection collection) where TCollection : IEnumerable<TElement> {
          if (collection == null) {
             WriteNull(slot);
+         } else if (GenericTypeUnpacker<TElement>.Definition == typeof(KeyValuePair<,>)) {
+            MapBoxBuilderAndWriteObjectVisitor<TElement>.Process(this, slot, collection);
          } else {
-            WriteObject(slot, new IArrayBox<TElement>(collection));
+            WriteObject(slot, new ArrayBox<TElement>(collection));
          }
       }
 
@@ -237,6 +244,34 @@ namespace Dargon.Vox.Internals.Serialization {
 
          public void Put(int index, int size) => storage[index] = size;
          public int Take() => storage[nextTakenIndex++];
+      }
+
+      private static class MapBoxBuilderAndWriteObjectVisitor<TKeyValuePair> {
+         private delegate void InvokerFunc(TwoPassFrameWriter<T> writer, int slot, IEnumerable collection);
+
+         private static readonly InvokerFunc invoker;
+
+         static MapBoxBuilderAndWriteObjectVisitor() {
+            var method = new DynamicMethod(
+               "mapbox_visitor_" + typeof(TKeyValuePair).Name,
+               typeof(void), new[] { typeof(TwoPassFrameWriter<T>), typeof(int), typeof(IEnumerable) },
+               typeof(TwoPassFrameWriter<T>), true);
+            var emitter = method.GetILGenerator();
+            var mapBoxType = GenericTypeUnpacker<TKeyValuePair>.Build(typeof(MapBox<,>));
+            var writeObjectMethod = typeof(TwoPassFrameWriter<T>).GetMethod("WriteObject").MakeGenericMethod(mapBoxType);
+            emitter.Emit(OpCodes.Ldarg_0);
+            emitter.Emit(OpCodes.Ldarg_1);
+            emitter.Emit(OpCodes.Ldarg_2);
+            emitter.Emit(OpCodes.Castclass, typeof(IEnumerable<TKeyValuePair>));
+            emitter.Emit(OpCodes.Newobj, mapBoxType.GetConstructors().First(c => c.GetParameters().Length == 1));
+            emitter.Emit(OpCodes.Call, writeObjectMethod);
+            emitter.Emit(OpCodes.Ret);
+            invoker = (InvokerFunc)method.CreateDelegate(typeof(InvokerFunc));
+         } 
+
+         public static void Process(TwoPassFrameWriter<T> writer, int slot, IEnumerable mapBox) {
+            invoker(writer, slot, mapBox);
+         }
       }
    }
 }

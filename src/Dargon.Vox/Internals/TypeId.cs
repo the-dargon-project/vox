@@ -17,6 +17,7 @@
       GenericTypeIdBegin   = -0x33,
       GenericTypeIdEnd     = -0x34,
 
-      Collection           = -0x40,
+      Array           = -0x40,
+      Map           = -0x41,
    }
 }
