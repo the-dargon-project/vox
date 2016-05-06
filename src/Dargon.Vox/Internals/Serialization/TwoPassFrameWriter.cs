@@ -18,7 +18,6 @@ namespace Dargon.Vox.Internals.Serialization {
       private IForwardDataWriter output;
       private byte[] stringBuffer = new byte[16];
       
-
       public void RunPasses(T subject, IForwardDataWriter writer) {
          PrepareDryPass();
          WriteObject<T>(0, subject);
@@ -60,6 +59,8 @@ namespace Dargon.Vox.Internals.Serialization {
             WriteNumeric(slot, (int)(object)subject);
          } else if (typeof(U) == typeof(string)) {
             WriteString(slot, (string)(object)subject);
+         } else if (typeof(U) == typeof(Type)) {
+            WriteType(slot, (Type)(object)subject);
          } else if (typeof(U) == typeof(Guid)) {
             WriteGuid(slot, (Guid)(object)subject);
          } else if (typeof(IEnumerable).IsAssignableFrom(typeof(U))) {
@@ -185,6 +186,24 @@ namespace Dargon.Vox.Internals.Serialization {
          }
       }
 
+      public void WriteType(int slot, Type type) {
+         WriteTypeVisitor.Visit(this, slot, type);
+      }
+
+      public void WriteType<T>(int slot) {
+         if (isDryPass) {
+            var typeSerialization = FullTypeToBinaryRepresentationCache<T>.Serialization;
+            fakeWriter.Position += TypeId.Type.ComputeTypeIdLength()
+               + typeSerialization.Length.ComputeVariableIntLength()
+               + typeSerialization.Length;
+         } else {
+            var typeSerialization = FullTypeToBinaryRepresentationCache<T>.Serialization;
+            output.WriteTypeId(TypeId.Type);
+            output.WriteVariableInt(typeSerialization.Length);
+            output.WriteBytes(typeSerialization);
+         }
+      }
+
       public void WriteGuid(int slot, Guid guid) {
          const int kGuidLength = 16;
          if (isDryPass) {
@@ -302,6 +321,22 @@ namespace Dargon.Vox.Internals.Serialization {
 
          public static void Process(TwoPassFrameWriter<T> writer, int slot, IEnumerable mapBox) {
             invoker(writer, slot, mapBox);
+         }
+      }
+
+      private static class WriteTypeVisitor {
+         private delegate void InvokerFunc(TwoPassFrameWriter<T> writer, int slot);
+
+         private static readonly IGenericFlyweightFactory<InvokerFunc> invokers
+            = GenericFlyweightFactory.ForMethod<InvokerFunc>(
+               typeof(WriteTypeVisitor), nameof(Visitor));
+
+         private static void Visitor<T>(TwoPassFrameWriter<T> writer, int slot) {
+            writer.WriteType<T>(slot);
+         }
+
+         public static void Visit(TwoPassFrameWriter<T> writer, int slot, Type type) {
+            invokers.Get(type)(writer, slot);
          }
       }
    }

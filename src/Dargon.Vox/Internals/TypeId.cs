@@ -9,6 +9,7 @@
       Guid                 = -0x08,
       BoolTrue             = -0x09,
       BoolFalse            = -0x0A,
+      Type                 = -0x0B,
 
       Null                 = -0x20,
       Void                 = -0x21,
@@ -17,7 +18,7 @@
       GenericTypeIdBegin   = -0x33,
       GenericTypeIdEnd     = -0x34,
 
-      Array           = -0x40,
-      Map           = -0x41,
+      Array                = -0x40,
+      Map                  = -0x41,
    }
 }

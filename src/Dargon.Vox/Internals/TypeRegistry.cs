@@ -20,6 +20,7 @@ namespace Dargon.Vox.Internals {
             [TypeId.BoolTrue] = typeof(BoolTrue),
             [TypeId.BoolFalse] = typeof(BoolFalse),
             [TypeId.String] = typeof(string),
+            [TypeId.Type] = typeof(Type),
             [TypeId.Guid] = typeof(Guid),
             [TypeId.Null] = typeof(NullType),
             [TypeId.Array] = typeof(ArrayBox<>),

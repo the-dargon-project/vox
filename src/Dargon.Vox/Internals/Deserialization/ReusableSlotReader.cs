@@ -63,6 +63,8 @@ namespace Dargon.Vox.Internals.Deserialization {
          }
       }
       public string ReadString(int slot) => ReadNonpolymorphicHelper<string>(slot);
+      public Type ReadType(int slot) => ReadNonpolymorphicHelper<Type>(slot);
+
       public Guid ReadGuid(int slot) => ReadNonpolymorphicHelper<Guid>(slot);
       public object ReadNull(int slot) => ReadNonpolymorphicHelper<NullType>(slot);
 

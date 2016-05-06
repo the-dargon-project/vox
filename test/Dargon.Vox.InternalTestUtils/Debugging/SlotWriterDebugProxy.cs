@@ -47,6 +47,11 @@ namespace Dargon.Vox.InternalTestUtils.Debugging {
          target.WriteString(slot, s);
       }
 
+      public void WriteType(int slot, Type type) {
+         Out(slot, "Write Type: " + type);
+         target.WriteType(slot, type);
+      }
+
       public void WriteNull(int slot) {
          Out(slot, "Write Null");
          target.WriteNull(slot);

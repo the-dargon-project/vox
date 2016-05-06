@@ -113,6 +113,9 @@ namespace Dargon.Vox.Internals {
             } else if (typeof(T) == typeof(string)) {
                writerMethod = slotWriter.GetMethod(nameof(ISlotWriter.WriteString));
                readerMethod = slotReader.GetMethod(nameof(ISlotReader.ReadString));
+            } else if (typeof(T) == typeof(Type)) {
+               writerMethod = slotWriter.GetMethod(nameof(ISlotWriter.WriteType));
+               readerMethod = slotReader.GetMethod(nameof(ISlotReader.ReadType));
             } else if (typeof(IEnumerable).IsAssignableFrom(typeof(T))) {
                var elementType = typeof(T).GetInterfaces()
                                           .First(i => i.Name.Contains(nameof(IEnumerable)) && i.IsGenericType)

@@ -11,6 +11,7 @@ namespace Dargon.Vox {
       bool ReadBoolean(int slot);
       int ReadNumeric(int slot);
       string ReadString(int slot);
+      Type ReadType(int slot);
       Guid ReadGuid(int slot);
       object ReadNull(int slot);
 

@@ -9,6 +9,7 @@ namespace Dargon.Vox.InternalTestUtils.Debugging {
       public void WriteBoolean(int slot, bool val) {} 
       public void WriteNumeric(int slot, int val) {}
       public void WriteString(int slot, string s) {}
+      public void WriteType(int slot, Type type) {}
       public void WriteGuid(int slot, Guid guid) {}
       public void WriteNull(int slot) {}
       public void WriteCollection<TElement, TCollection>(int slot, TCollection collection) where TCollection : IEnumerable<TElement> {}

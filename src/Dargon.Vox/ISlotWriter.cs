@@ -12,6 +12,7 @@ namespace Dargon.Vox {
       void WriteNumeric(int slot, int val);
       void WriteGuid(int slot, Guid guid);
       void WriteString(int slot, string s);
+      void WriteType(int slot, Type type);
       void WriteNull(int slot);
       void WriteCollection<TElement, TCollection>(int slot, TCollection collection) where TCollection : IEnumerable<TElement>;
    }

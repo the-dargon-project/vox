@@ -8,6 +8,7 @@ namespace Dargon.Vox.Internals.Deserialization {
    public static class VoxObjectBodyDeserializerAndSkipper<T> {
       [ThreadStatic] private static byte[] stringBuffer;
       [ThreadStatic] private static byte[] guidBuffer;
+      private static ReusableLengthLimitedSubForwardDataReaderProxy typeDataReaderProxy = new ReusableLengthLimitedSubForwardDataReaderProxy();
 
       public static T Deserialize(ILengthLimitedForwardDataReader input) {
          if (typeof(T) == typeof(byte[])) {
@@ -26,6 +27,12 @@ namespace Dargon.Vox.Internals.Deserialization {
             EnsureSize(ref stringBuffer, length);
             input.ReadBytes(length, stringBuffer);
             return (T)(object)Encoding.UTF8.GetString(stringBuffer, 0, length);
+         } else if (typeof(T) == typeof(Type)) {
+            var length = input.ReadVariableInt();
+            typeDataReaderProxy.SetTarget(input);
+            typeDataReaderProxy.SetBytesRemaining(length);
+            var type = typeDataReaderProxy.ReadFullType();
+            return (T)(object)type;
          } else if (typeof(T) == typeof(Guid)) {
             EnsureSize(ref guidBuffer, 16);
             input.ReadBytes(16, guidBuffer);

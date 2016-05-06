@@ -9,6 +9,8 @@ namespace Dargon.Vox.InternalTestUtils.Debugging {
       public bool ReadBoolean(int slot) => false;
       public int ReadNumeric(int slot) => 0;
       public string ReadString(int slot) => null;
+      public Type ReadType(int slot) => null;
+
       public Guid ReadGuid(int slot) => Guid.Empty;
       public object ReadNull(int slot) => null;
       public TCollection ReadCollection<TElement, TCollection>(int slot) where TCollection : IEnumerable<TElement> {

@@ -8,6 +8,10 @@ using Xunit;
 
 namespace Dargon.Vox.RoundTripTests {
    public class AutoserializationIT : NMockitoInstance {
+      public AutoserializationIT() {
+         TestTypeRegistrationHelpers.Register(typeof(LinkedListNode<>));
+      }
+
       [Fact]
       public void Hodgepodge() {
          TestTypeRegistrationHelpers.RegisterWithSerializer<HodgepodgeDto>();
@@ -23,6 +27,7 @@ namespace Dargon.Vox.RoundTripTests {
             StringArray = CreatePlaceholder<string[]>(),
             IntStringMap = CreatePlaceholder<Dictionary<int, string>>(),
             IntStringStringArrayMapArrayMap = CreatePlaceholder<Dictionary<int, Dictionary<string, string[]>[]>>(),
+            Type = typeof(LinkedListNode<int>),
          });
       }
 
@@ -43,7 +48,6 @@ namespace Dargon.Vox.RoundTripTests {
       }
 
       private void LinkedList_RunTest<T>(LinkedListNode<T> node) {
-         TestTypeRegistrationHelpers.Register(typeof(LinkedListNode<>));
          RoundTripTest.Run(node);
       }
 
@@ -59,6 +63,7 @@ namespace Dargon.Vox.RoundTripTests {
          public string[] StringArray { get; set; }
          public Dictionary<int, string> IntStringMap { get; set; }
          public Dictionary<int, Dictionary<string, string[]>[]> IntStringStringArrayMapArrayMap { get; set; }
+         public Type Type { get; set; }
 
          public override bool Equals(object obj) => Equals(obj as HodgepodgeDto);
 
@@ -86,7 +91,8 @@ namespace Dargon.Vox.RoundTripTests {
                                                                 return aDict.Count == bDict.Count &&
                                                                        aDict.All(innerKvp => bDict[innerKvp.Key].SequenceEqual(innerKvp.Value));
                                                              });
-                                                });
+                                                }) &&
+                                                Type == o.Type;
       }
 
       [AutoSerializable]
