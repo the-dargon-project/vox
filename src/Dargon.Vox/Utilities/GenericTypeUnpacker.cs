@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Dargon.Vox.Utilities {
    public class GenericTypeUnpacker<T> {

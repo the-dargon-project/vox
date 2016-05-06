@@ -4,6 +4,7 @@ using Dargon.Vox.Internals.TypePlaceholders.Boxes;
 using Dargon.Vox.Slots;
 using Dargon.Vox.Utilities;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -29,6 +30,8 @@ namespace Dargon.Vox.Internals.Deserialization {
             return (T)(object)ReadNumeric(slot);
          } else if (typeof(T) == typeof(bool)) {
             return (T)(object)ReadBoolean(slot);
+         } else if (typeof(T) != typeof(string) && typeof(IEnumerable).IsAssignableFrom(typeof(T))) {
+            return ReadCollectionVisitor<T>.Visit(this, slot);
          } else {
             return ReadNonpolymorphicHelper<T>(slot);
          }
@@ -99,6 +102,31 @@ namespace Dargon.Vox.Internals.Deserialization {
             _nextSlot++;
          }
          _nextSlot++;
+      }
+
+      private static class ReadCollectionVisitor<TCollection> {
+         private delegate TCollection InvokerFunc(ReusableSlotReader reader, int slot);
+
+         private static readonly InvokerFunc invoker;
+
+         static ReadCollectionVisitor() {
+            var method = new DynamicMethod(
+               "read_collection_visitor_" + typeof(TCollection).Name,
+               typeof(TCollection), new[] { typeof(ReusableSlotReader), typeof(int) },
+               typeof(ReusableSlotReader), true);
+            var emitter = method.GetILGenerator();
+            var elementType = CollectionUnpacker<TCollection>.ElementType;
+            var readCollectionMethod = typeof(ReusableSlotReader).GetMethod(nameof(ReadCollection), BindingFlags.Instance | BindingFlags.Public)
+                                                                           .MakeGenericMethod(elementType, typeof(TCollection));
+            emitter.Emit(OpCodes.Ldarg_0);
+            emitter.Emit(OpCodes.Ldarg_1);
+            emitter.Emit(OpCodes.Call, readCollectionMethod);
+            emitter.Emit(OpCodes.Ret);
+
+            invoker = (InvokerFunc)method.CreateDelegate(typeof(InvokerFunc));
+         }
+
+         public static TCollection Visit(ReusableSlotReader reader, int slot) => invoker(reader, slot);
       }
 
       private static class ReadNonpolymorphicHelperMapBoxVisitor<TKeyValuePair> {

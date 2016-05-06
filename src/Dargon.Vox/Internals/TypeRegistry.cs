@@ -31,6 +31,7 @@ namespace Dargon.Vox.Internals {
       public static Type Lookup(TypeId typeId) => typesById[typeId];
       public static TypeId Lookup<T>() => Lookup(typeof(T));
       public static TypeId Lookup(Type t) => idsByType[t];
+      public static bool TryLookup(Type t, out TypeId typeId) => idsByType.TryGetValue(t, out typeId);
 
       public static void RegisterType(TypeId typeId, Type type) {
          RegisterTypes(ImmutableDictionary.Of(typeId, type));

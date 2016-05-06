@@ -24,11 +24,12 @@ namespace Dargon.Vox.Internals.TypePlaceholders.Boxes {
       public void Deserialize(ISlotReader reader) {
          var i = 0;
          var count = reader.ReadNumeric(i++);
-         var result = Util.Generate(
-            count,
-            _ => new KeyValuePair<TKey, TValue>(
-               reader.ReadObject<TKey>(i++),
-               reader.ReadObject<TValue>(i++)));
+         var result = new KeyValuePair<TKey, TValue>[count];
+         for (int j = 0; j < result.Length; j++) {
+            var k = reader.ReadObject<TKey>(i++);
+            var v = reader.ReadObject<TValue>(i++);
+            result[j] = new KeyValuePair<TKey, TValue>(k, v);
+         }
          inner = result;
       }
 

@@ -62,6 +62,8 @@ namespace Dargon.Vox.Internals.Serialization {
             WriteString(slot, (string)(object)subject);
          } else if (typeof(U) == typeof(Guid)) {
             WriteGuid(slot, (Guid)(object)subject);
+         } else if (typeof(IEnumerable).IsAssignableFrom(typeof(U))) {
+            WriteCollectionVisitor<U>.Process(this, slot, subject);
          } else {
             if (subject == null) {
                WriteNull(slot);
@@ -244,6 +246,35 @@ namespace Dargon.Vox.Internals.Serialization {
 
          public void Put(int index, int size) => storage[index] = size;
          public int Take() => storage[nextTakenIndex++];
+      }
+
+      private static class WriteCollectionVisitor<TCollection> {
+         private delegate void InvokerFunc(TwoPassFrameWriter<T> writer, int slot, TCollection collection);
+
+         private static readonly InvokerFunc invoker;
+
+         static WriteCollectionVisitor() {
+            var method = new DynamicMethod(
+               "write_collection_visitor_" + typeof(TCollection).Name,
+               typeof(void), new[] { typeof(TwoPassFrameWriter<T>), typeof(int), typeof(TCollection) },
+               typeof(TwoPassFrameWriter<T>), true);
+            var emitter = method.GetILGenerator();
+            var elementType = typeof(TCollection).GetInterfaces()
+                                                 .First(i => i.Name.Contains(nameof(IEnumerable)) && i.IsGenericType)
+                                                 .GetGenericArguments()[0];
+            var writeCollectionMethod = typeof(TwoPassFrameWriter<T>).GetMethod(nameof(TwoPassFrameWriter<object>.WriteCollection))
+                                                                     .MakeGenericMethod(elementType, typeof(TCollection));
+            emitter.Emit(OpCodes.Ldarg_0);
+            emitter.Emit(OpCodes.Ldarg_1);
+            emitter.Emit(OpCodes.Ldarg_2);
+            emitter.Emit(OpCodes.Call, writeCollectionMethod);
+            emitter.Emit(OpCodes.Ret);
+            invoker = (InvokerFunc)method.CreateDelegate(typeof(InvokerFunc));
+         }
+
+         public static void Process(TwoPassFrameWriter<T> writer, int slot, TCollection collection) {
+            invoker(writer, slot, collection);
+         }
       }
 
       private static class MapBoxBuilderAndWriteObjectVisitor<TKeyValuePair> {

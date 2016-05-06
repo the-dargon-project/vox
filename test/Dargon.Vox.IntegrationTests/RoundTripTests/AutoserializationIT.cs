@@ -3,6 +3,7 @@ using NMockito;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Dargon.Commons;
 using Xunit;
 
 namespace Dargon.Vox.RoundTripTests {
@@ -21,6 +22,7 @@ namespace Dargon.Vox.RoundTripTests {
             IntList = CreatePlaceholder<List<int>>(),
             StringArray = CreatePlaceholder<string[]>(),
             IntStringMap = CreatePlaceholder<Dictionary<int, string>>(),
+            IntStringStringArrayMapArrayMap = CreatePlaceholder<Dictionary<int, Dictionary<string, string[]>[]>>(),
          });
       }
 
@@ -53,9 +55,10 @@ namespace Dargon.Vox.RoundTripTests {
          public int Int32 { get; set; }
          public string String { get; set; }
          public Guid Guid { get; set; }
-         public List<int> IntList { get; set; } 
+         public List<int> IntList { get; set; }
          public string[] StringArray { get; set; }
          public Dictionary<int, string> IntStringMap { get; set; }
+         public Dictionary<int, Dictionary<string, string[]>[]> IntStringStringArrayMapArrayMap { get; set; }
 
          public override bool Equals(object obj) => Equals(obj as HodgepodgeDto);
 
@@ -70,7 +73,20 @@ namespace Dargon.Vox.RoundTripTests {
                                                 IntList.SequenceEqual(o.IntList) &&
                                                 StringArray.SequenceEqual(o.StringArray) &&
                                                 IntStringMap.Count == o.IntStringMap.Count &&
-                                                IntStringMap.All(kvp => o.IntStringMap[kvp.Key] == kvp.Value);
+                                                IntStringMap.All(kvp => o.IntStringMap[kvp.Key] == kvp.Value) &&
+                                                IntStringStringArrayMapArrayMap.Count == o.IntStringStringArrayMapArrayMap.Count &&
+                                                IntStringStringArrayMapArrayMap.All(kvp => {
+                                                   var aDicts = kvp.Value;
+                                                   var bDicts = o.IntStringStringArrayMapArrayMap[kvp.Key];
+                                                   return aDicts.Length == bDicts.Length &&
+                                                          aDicts.Zip(bDicts, Tuple.Create).All(
+                                                             (dicts) => {
+                                                                var aDict = dicts.Item1;
+                                                                var bDict = dicts.Item2;
+                                                                return aDict.Count == bDict.Count &&
+                                                                       aDict.All(innerKvp => bDict[innerKvp.Key].SequenceEqual(innerKvp.Value));
+                                                             });
+                                                });
       }
 
       [AutoSerializable]
@@ -78,7 +94,7 @@ namespace Dargon.Vox.RoundTripTests {
          public T Value { get; set; }
          public LinkedListNode<T> Next { get; set; }
 
-         public LinkedListNode() { }
+         public LinkedListNode() {}
 
          public LinkedListNode(T value, LinkedListNode<T> next = null) {
             Value = value;
