@@ -23,6 +23,11 @@ Useful Reserved tIds: [-0x01, -0x40]
 -0x33 - begin generic typeid
 -0x34 - end generic typeid
 
+-0x40 - collection (non-polymorphic)
+-0x41 - collection (polymorphic)
+
+
+
 -3 - array(non-polymorphic)
 -4 - array(polymorphic)
 -5 - map(non-polymorphic, non-polymorphic)
