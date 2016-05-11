@@ -26,15 +26,19 @@ namespace Dargon.Vox.Internals.Deserialization {
       }
 
       public static unsafe T DeserializeNonpolymorphic<T>(ILengthLimitedForwardDataReader input) {
-         var expectedTypeSerialization = FullTypeToBinaryRepresentationCache<T>.Serialization;
-         byte* actualTypeSerialization = stackalloc byte[expectedTypeSerialization.Length];
-         for (var i = 0; i < expectedTypeSerialization.Length; i++) {
-            actualTypeSerialization[i] = input.ReadByte();
-            if (actualTypeSerialization[i] != expectedTypeSerialization[i]) {
-               // todo: push read bytes back onto a data reader, deserialize actual type for exception.
-               throw new NonpolymorphicTypeMismatchException("Deserialized Nonpolymorphic Type is not " + typeof(T).FullName);
-            }
+         var type = input.ReadFullType();
+         if (type != typeof(T)) {
+            throw new Exception($"WTF {type} {typeof(T)}");
          }
+//         var expectedTypeSerialization = FullTypeToBinaryRepresentationCache<T>.Serialization;
+//         byte* actualTypeSerialization = stackalloc byte[expectedTypeSerialization.Length];
+//         for (var i = 0; i < expectedTypeSerialization.Length; i++) {
+//            actualTypeSerialization[i] = input.ReadByte();
+//            if (actualTypeSerialization[i] != expectedTypeSerialization[i]) {
+//               // todo: push read bytes back onto a data reader, deserialize actual type for exception.
+//               throw new NonpolymorphicTypeMismatchException("Deserialized Nonpolymorphic Type is not " + typeof(T).FullName);
+//            }
+//         }
          return VoxObjectBodyDeserializerAndSkipper<T>.Deserialize(input);
       }
 

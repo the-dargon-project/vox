@@ -9,7 +9,7 @@ using Dargon.Ryu.Modules;
 using Dargon.Vox.Internals;
 
 namespace Dargon.Vox.Ryu {
-   public class MessagesRyuExtensionModule : RyuModule, IRyuExtensionModule {
+   public class VoxRyuExtensionModule : RyuModule, IRyuExtensionModule {
       public void Loaded(IRyuExtensionArguments args) { }
 
       public void PreConstruction(IRyuExtensionArguments args) {
@@ -20,9 +20,12 @@ namespace Dargon.Vox.Ryu {
          var ryu = args.Container;
 
          // Create auto-serializers
-         var autoSerializableTypes = AppDomain.CurrentDomain.GetAssemblies().SelectMany(x => x.ExportedTypes)
-                                              .Where(x => x.GetAttributeOrNull<AutoSerializableAttribute>() != null)
-                                              .ToArray();
+         var types = AppDomain.CurrentDomain.GetAssemblies().Where(a => !a.IsDynamic).SelectMany(x => x.ExportedTypes).ToList();
+
+         // instantiate all VoxTypes classes, which registers typeIds
+         types.Where(t => t != typeof(VoxTypes) && typeof(VoxTypes).IsAssignableFrom(t)).ForEach(t => { Activator.CreateInstance(t); });
+
+         var autoSerializableTypes = types.Where(t => t.GetAttributeOrNull<AutoSerializableAttribute>() != null).ToArray();
          var autoTypeSerializers = AutoTypeSerializerFactory.CreateMany(autoSerializableTypes);
 
          // Find type serializers registered via ryu:

@@ -68,13 +68,15 @@ namespace Dargon.Vox.Internals.Serialization {
          } else {
             if (subject == null) {
                WriteNull(slot);
+            } else if (typeof(U) == typeof(object)) {
+               WriteObjectVisitor.Visit(this, slot, subject);
             } else {
                // Custom object writer pushes to length queue on its own
                WriteCustomObject(slot, subject);
             }
          }
       }
-
+      
       public void WriteCustomObject<U>(int slot, U subject) {
          if (isDryPass) {
             var lengthIndex = objectLengthCollection.Reserve();
@@ -337,6 +339,22 @@ namespace Dargon.Vox.Internals.Serialization {
 
          public static void Visit(TwoPassFrameWriter<T> writer, int slot, Type type) {
             invokers.Get(type)(writer, slot);
+         }
+      }
+
+      private static class WriteObjectVisitor {
+         private delegate void InvokerFunc(TwoPassFrameWriter<T> writer, int slot, object subject);
+
+         private static readonly IGenericFlyweightFactory<InvokerFunc> invokers
+            = GenericFlyweightFactory.ForMethod<InvokerFunc>(
+               typeof(WriteObjectVisitor), nameof(Visitor));
+
+         private static void Visitor<T>(TwoPassFrameWriter<T> writer, int slot, object subject) {
+            writer.WriteObject(slot, (T)subject);
+         }
+
+         public static void Visit(TwoPassFrameWriter<T> writer, int slot, object subject) {
+            invokers.Get(subject.GetType())(writer, slot, subject);
          }
       }
    }

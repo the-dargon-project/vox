@@ -23,6 +23,7 @@ namespace Dargon.Vox.Internals {
             [TypeId.Type] = typeof(Type),
             [TypeId.Guid] = typeof(Guid),
             [TypeId.Null] = typeof(NullType),
+            [TypeId.Object] = typeof(object),
             [TypeId.Array] = typeof(ArrayBox<>),
             [TypeId.Map] = typeof(MapBox<,>),
          });

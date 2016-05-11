@@ -13,7 +13,7 @@ namespace Dargon.Vox.Internals.Deserialization {
       static VoxObjectActivator() {
          var ctors = typeof(T).GetConstructors();
          foreach (var ctor in ctors) {
-            if (ctor.GetParameters().All(p => p.HasDefaultValue)) {
+            if (ctor.IsPublic && ctor.GetParameters().All(p => p.HasDefaultValue)) {
                _factory = Expression.Lambda<Func<T>>(
                   Expression.New(typeof(T).GetConstructor(Type.EmptyTypes))).Compile();
             }

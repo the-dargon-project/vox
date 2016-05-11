@@ -33,11 +33,11 @@ namespace Dargon.Vox.Internals.Deserialization {
          } else if (typeof(T) != typeof(string) && typeof(IEnumerable).IsAssignableFrom(typeof(T))) {
             return ReadCollectionVisitor<T>.Visit(this, slot);
          } else {
-            return ReadNonpolymorphicHelper<T>(slot);
+            return ReadHelper<T>(slot);
          }
       }
 
-      public byte[] ReadBytes(int slot) => ReadNonpolymorphicHelper<byte[]>(slot);
+      public byte[] ReadBytes(int slot) => ReadHelper<byte[]>(slot);
       public bool ReadBoolean(int slot) {
          AdvanceUntil(slot);
          var typeId = _reader.ReadTypeId();
@@ -62,18 +62,18 @@ namespace Dargon.Vox.Internals.Deserialization {
             throw new SlotTypeMismatchException(TypeId.Int32, typeId);
          }
       }
-      public string ReadString(int slot) => ReadNonpolymorphicHelper<string>(slot);
-      public Type ReadType(int slot) => ReadNonpolymorphicHelper<Type>(slot);
+      public string ReadString(int slot) => ReadHelper<string>(slot);
+      public Type ReadType(int slot) => ReadHelper<Type>(slot);
 
-      public Guid ReadGuid(int slot) => ReadNonpolymorphicHelper<Guid>(slot);
-      public object ReadNull(int slot) => ReadNonpolymorphicHelper<NullType>(slot);
+      public Guid ReadGuid(int slot) => ReadHelper<Guid>(slot);
+      public object ReadNull(int slot) => ReadHelper<NullType>(slot);
 
       public TCollection ReadCollection<TElement, TCollection>(int slot) where TCollection : IEnumerable<TElement> {
          ISerializationBox box;
          if (GenericTypeUnpacker<TElement>.Definition == typeof(KeyValuePair<,>)) {
             box = ReadNonpolymorphicHelperMapBoxVisitor<TElement>.Visit(this, slot);
          } else {
-            box = ReadNonpolymorphicHelper<ArrayBox<TElement>>(slot);
+            box = ReadHelper<ArrayBox<TElement>>(slot);
          }
          var elements = (TElement[])box.Unbox();
          if (typeof(TCollection) == typeof(TElement[])) {
@@ -93,9 +93,13 @@ namespace Dargon.Vox.Internals.Deserialization {
          return instance;
       }
 
-      private T ReadNonpolymorphicHelper<T>(int slot) {
+      private T ReadHelper<T>(int slot) {
          AdvanceUntil(slot);
-         return VoxObjectDeserializer.DeserializeNonpolymorphic<T>(_reader);
+         if (typeof(T) == typeof(object)) {
+            return (T)VoxObjectDeserializer.Deserialize(_reader);
+         } else {
+            return VoxObjectDeserializer.DeserializeNonpolymorphic<T>(_reader);
+         }
       }
 
       private void AdvanceUntil(int slot) {
