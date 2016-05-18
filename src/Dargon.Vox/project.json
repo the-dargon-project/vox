@@ -6,8 +6,8 @@
     },
 
     "dependencies": {
-        "Dargon.Commons": "",
-        "Dargon.Ryu.Api": ""
+        "Dargon.Commons": "*",
+        "Dargon.Ryu.Api": "*"
     },
 
     "compilationOptions": {

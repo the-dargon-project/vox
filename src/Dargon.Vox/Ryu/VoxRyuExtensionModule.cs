@@ -25,7 +25,7 @@ namespace Dargon.Vox.Ryu {
          // instantiate all VoxTypes classes, which registers typeIds
          types.Where(t => t != typeof(VoxTypes) && typeof(VoxTypes).IsAssignableFrom(t)).ForEach(t => { Activator.CreateInstance(t); });
 
-         var autoSerializableTypes = types.Where(t => t.GetAttributeOrNull<AutoSerializableAttribute>() != null).ToArray();
+         var autoSerializableTypes = types.Where(t => t.GetAttributeOrNull<AutoSerializableAttribute>() != null && !t.IsGenericTypeDefinition).ToArray();
          var autoTypeSerializers = AutoTypeSerializerFactory.CreateMany(autoSerializableTypes);
 
          // Find type serializers registered via ryu:
