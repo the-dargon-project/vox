@@ -2,6 +2,7 @@
 using Dargon.Vox.Data;
 using Dargon.Vox.Internals.Serialization;
 using Dargon.Vox.Internals.TypePlaceholders;
+using Dargon.Vox.Internals.TypePlaceholders.Boxes;
 using Dargon.Vox.Slots;
 using Dargon.Vox.Utilities;
 
@@ -21,15 +22,19 @@ namespace Dargon.Vox.Internals.Deserialization {
          } else if (type == typeof(BoolFalse)) {
             return false;
          } else {
-            return objectBodyDeserializerByType.Get(type)(input);
+            var instance = objectBodyDeserializerByType.Get(type)(input);
+            if (instance is ISerializationBox) {
+               instance = ((ISerializationBox)instance).Unbox();
+            }
+            return instance;
          }
       }
 
       public static unsafe T DeserializeNonpolymorphic<T>(ILengthLimitedForwardDataReader input) {
          var type = input.ReadFullType();
-         if (type != typeof(T)) {
-            throw new Exception($"WTF {type} {typeof(T)}");
-         }
+//         if (type != typeof(T)) {
+//            throw new Exception($"WTF {type} {typeof(T)}");
+//         }
 //         var expectedTypeSerialization = FullTypeToBinaryRepresentationCache<T>.Serialization;
 //         byte* actualTypeSerialization = stackalloc byte[expectedTypeSerialization.Length];
 //         for (var i = 0; i < expectedTypeSerialization.Length; i++) {

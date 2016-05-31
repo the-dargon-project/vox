@@ -2,6 +2,7 @@ using System;
 using Dargon.Vox.Data;
 using Dargon.Vox.Internals.TypePlaceholders;
 using System.Text;
+using Dargon.Vox.Internals.TypePlaceholders.Boxes;
 using SubReader = Dargon.Vox.Data.ReusableLengthLimitedSubForwardDataReaderProxy;
 
 namespace Dargon.Vox.Internals.Deserialization {
@@ -10,7 +11,7 @@ namespace Dargon.Vox.Internals.Deserialization {
       [ThreadStatic] private static byte[] guidBuffer;
       private static ReusableLengthLimitedSubForwardDataReaderProxy typeDataReaderProxy = new ReusableLengthLimitedSubForwardDataReaderProxy();
 
-      public static T Deserialize(ILengthLimitedForwardDataReader input) {
+      public unsafe static T Deserialize(ILengthLimitedForwardDataReader input) {
          if (typeof(T) == typeof(byte[])) {
             var count = input.ReadVariableInt();
             return (T)(object)input.ReadBytes(count);
@@ -19,7 +20,7 @@ namespace Dargon.Vox.Internals.Deserialization {
          } else if (typeof(T) == typeof(sbyte)) {
             return (T)(object)(sbyte)input.ReadByte();
          } else if (typeof(T) == typeof(short)) {
-            return (T)(object)(input.ReadByte() | (input.ReadByte() << 8));
+            return (T)(object)(short)(input.ReadByte() | (input.ReadByte() << 8));
          } else if (typeof(T) == typeof(int)) {
             return (T)(object)(input.ReadByte() | (input.ReadByte() << 8) | (input.ReadByte() << 16) | (input.ReadByte() << 24));
          } else if (typeof(T) == typeof(string)) {
@@ -33,6 +34,14 @@ namespace Dargon.Vox.Internals.Deserialization {
             typeDataReaderProxy.SetBytesRemaining(length);
             var type = typeDataReaderProxy.ReadFullType();
             return (T)(object)type;
+         } else if (typeof(T) == typeof(DateTime)) {
+            return (T)(object)new DateTime((long)input.ReadUInt64());
+         } else if (typeof(T) == typeof(float)) {
+            var data = input.ReadUInt32();
+            return (T)(object)*(float*)&data;
+         } else if (typeof(T) == typeof(double)) {
+            var data = input.ReadUInt64();
+            return (T)(object)*(double*)&data;
          } else if (typeof(T) == typeof(Guid)) {
             EnsureSize(ref guidBuffer, 16);
             input.ReadBytes(16, guidBuffer);
@@ -59,6 +68,12 @@ namespace Dargon.Vox.Internals.Deserialization {
          } else if (typeof(T) == typeof(string)) {
             var count = input.ReadVariableInt();
             input.SkipBytes(count);
+         } else if (typeof(T) == typeof(DateTime)) {
+            input.SkipBytes(8);
+         } else if (typeof(T) == typeof(float)) {
+            input.SkipBytes(4);
+         } else if (typeof(T) == typeof(double)) {
+            input.SkipBytes(8);
          } else if (typeof(T) == typeof(Guid)) {
             input.SkipBytes(16);
          } else if (typeof(T) == typeof(NullType)) {

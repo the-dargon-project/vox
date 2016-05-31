@@ -49,21 +49,33 @@ namespace Dargon.Vox.Internals.Deserialization {
             throw new SlotTypeMismatchException(TypeId.BoolTrue, typeId);
          }
       }
-      public int ReadNumeric(int slot) {
+
+      public unsafe int ReadNumeric(int slot) {
          AdvanceUntil(slot);
          var typeId = _reader.ReadTypeId();
          if (typeId == TypeId.Int8) {
-            return _reader.ReadByte();
+            return (sbyte)_reader.ReadByte();
          } else if (typeId == TypeId.Int16) {
-            return _reader.ReadByte() | (_reader.ReadByte() << 8);
+            byte* pBuff = stackalloc byte[2];
+            pBuff[0] = _reader.ReadByte();
+            pBuff[1] = _reader.ReadByte();
+            return *(short*)pBuff;
          } else if (typeId == TypeId.Int32) {
-            return _reader.ReadByte() | (_reader.ReadByte() << 8) | (_reader.ReadByte() << 16) | (_reader.ReadByte() << 24);
+            byte* pBuff = stackalloc byte[4];
+            pBuff[0] = _reader.ReadByte();
+            pBuff[1] = _reader.ReadByte();
+            pBuff[2] = _reader.ReadByte();
+            pBuff[3] = _reader.ReadByte();
+            return *(int*)pBuff;
          } else {
             throw new SlotTypeMismatchException(TypeId.Int32, typeId);
          }
       }
       public string ReadString(int slot) => ReadHelper<string>(slot);
       public Type ReadType(int slot) => ReadHelper<Type>(slot);
+      public DateTime ReadDateTime(int slot) => ReadHelper<DateTime>(slot);
+      public float ReadFloat(int slot) => ReadHelper<float>(slot);
+      public double ReadDouble(int slot) => ReadHelper<double>(slot);
 
       public Guid ReadGuid(int slot) => ReadHelper<Guid>(slot);
       public object ReadNull(int slot) => ReadHelper<NullType>(slot);
@@ -76,7 +88,7 @@ namespace Dargon.Vox.Internals.Deserialization {
             box = ReadHelper<ArrayBox<TElement>>(slot);
          }
          var elements = (TElement[])box.Unbox();
-         if (typeof(TCollection) == typeof(TElement[])) {
+         if (typeof(TCollection).IsAssignableFrom(typeof(TElement[]))) {
             return (TCollection)(object)elements;
          }
          var constructor = typeof(TCollection).GetConstructor(new[] { typeof(IEnumerable<TElement>) });
@@ -147,7 +159,8 @@ namespace Dargon.Vox.Internals.Deserialization {
                typeof(ReusableSlotReader), true);
             var emitter = method.GetILGenerator();
             var mapBoxType = GenericTypeUnpacker<TKeyValuePair>.Build(typeof(MapBox<,>));
-            var readNonpolymorphicHelperMethod = typeof(ReusableSlotReader).GetMethod("ReadNonpolymorphicHelper", BindingFlags.Instance | BindingFlags.NonPublic)
+            var readNonpolymorphicHelperMethod = typeof(ReusableSlotReader).GetMethods(BindingFlags.Instance | BindingFlags.Public)
+                                                                           .First(m => m.Name == nameof(ReusableSlotReader.ReadObject) && m.IsGenericMethod)
                                                                            .MakeGenericMethod(mapBoxType);
             emitter.Emit(OpCodes.Ldarg_0);
             emitter.Emit(OpCodes.Ldarg_1);

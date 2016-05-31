@@ -17,6 +17,10 @@ namespace Dargon.Vox.InternalTestUtils.Debugging {
       public int ReadNumeric(int slot) => ProxyResult(slot, "Read Numeric", target.ReadNumeric);
       public string ReadString(int slot) => ProxyResult(slot, "Read String", target.ReadString);
       public Type ReadType(int slot) => ProxyResult(slot, "Read Type", target.ReadType);
+      public DateTime ReadDateTime(int slot) => ProxyResult(slot, "Read DateTime", target.ReadDateTime);
+      public float ReadFloat(int slot) => ProxyResult(slot, "Read Float", target.ReadFloat);
+      public double ReadDouble(int slot) => ProxyResult(slot, "Read Double", target.ReadDouble);
+
       public Guid ReadGuid(int slot) => ProxyResult(slot, "Read Guid", target.ReadGuid);
       public object ReadNull(int slot) => ProxyResult(slot, "Read Null", target.ReadNull);
       public TCollection ReadCollection<TElement, TCollection>(int slot) where TCollection : IEnumerable<TElement> => ProxyResult(slot, "Read Collection", target.ReadCollection<TElement, TCollection>);

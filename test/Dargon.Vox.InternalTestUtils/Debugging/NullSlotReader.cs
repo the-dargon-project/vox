@@ -10,6 +10,9 @@ namespace Dargon.Vox.InternalTestUtils.Debugging {
       public int ReadNumeric(int slot) => 0;
       public string ReadString(int slot) => null;
       public Type ReadType(int slot) => null;
+      public DateTime ReadDateTime(int slot) => default(DateTime);
+      public float ReadFloat(int slot) => default(float);
+      public double ReadDouble(int slot) => default(double);
 
       public Guid ReadGuid(int slot) => Guid.Empty;
       public object ReadNull(int slot) => null;

@@ -4,11 +4,11 @@
     },
 
     "dependencies": {
-        "Dargon.Vox": "",
-        "NMockito": ""
+        "Dargon.Vox": "*",
+        "NMockito": "*"
     },
 
-    "compilationOptions": {
+    "buildOptions": {
         "emitEntryPoint": true
     },
 

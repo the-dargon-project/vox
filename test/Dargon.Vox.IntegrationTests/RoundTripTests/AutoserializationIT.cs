@@ -24,10 +24,14 @@ namespace Dargon.Vox.RoundTripTests {
             String = CreatePlaceholder<string>(),
             Guid = CreatePlaceholder<Guid>(),
             IntList = CreatePlaceholder<List<int>>(),
+            IntPowersArray = Enumerable.Range(-31, 31).Select(i => Math.Sign(i) * (1 << Math.Abs(i))).Concat(new [] { int.MinValue, int.MaxValue }).ToArray(),
             StringArray = CreatePlaceholder<string[]>(),
             IntStringMap = CreatePlaceholder<Dictionary<int, string>>(),
             IntStringStringArrayMapArrayMap = CreatePlaceholder<Dictionary<int, Dictionary<string, string[]>[]>>(),
             Type = typeof(LinkedListNode<int>),
+            DateTime = DateTime.FromFileTime(2131891),
+            Float = CreatePlaceholder<float>(),
+            Double = CreatePlaceholder<double>(),
          });
       }
 
@@ -61,9 +65,13 @@ namespace Dargon.Vox.RoundTripTests {
          public Guid Guid { get; set; }
          public List<int> IntList { get; set; }
          public string[] StringArray { get; set; }
+         public int[] IntPowersArray { get; set; }
          public Dictionary<int, string> IntStringMap { get; set; }
          public Dictionary<int, Dictionary<string, string[]>[]> IntStringStringArrayMapArrayMap { get; set; }
          public Type Type { get; set; }
+         public DateTime DateTime { get; set; }
+         public double Float { get; set; }
+         public double Double { get; set; }
 
          public override bool Equals(object obj) => Equals(obj as HodgepodgeDto);
 
@@ -77,6 +85,7 @@ namespace Dargon.Vox.RoundTripTests {
                                                 Guid.Equals(o.Guid) &&
                                                 IntList.SequenceEqual(o.IntList) &&
                                                 StringArray.SequenceEqual(o.StringArray) &&
+                                                IntPowersArray.SequenceEqual(o.IntPowersArray) &&
                                                 IntStringMap.Count == o.IntStringMap.Count &&
                                                 IntStringMap.All(kvp => o.IntStringMap[kvp.Key] == kvp.Value) &&
                                                 IntStringStringArrayMapArrayMap.Count == o.IntStringStringArrayMapArrayMap.Count &&
@@ -92,7 +101,12 @@ namespace Dargon.Vox.RoundTripTests {
                                                                        aDict.All(innerKvp => bDict[innerKvp.Key].SequenceEqual(innerKvp.Value));
                                                              });
                                                 }) &&
-                                                Type == o.Type;
+                                                Type == o.Type &&
+                                                DateTime == o.DateTime &&
+                                                // ReSharper disable once CompareOfFloatsByEqualityOperator
+                                                Float == o.Float &&
+                                                // ReSharper disable once CompareOfFloatsByEqualityOperator
+                                                Double == o.Double;
       }
 
       [AutoSerializable]

@@ -12,6 +12,9 @@ namespace Dargon.Vox {
       int ReadNumeric(int slot);
       string ReadString(int slot);
       Type ReadType(int slot);
+      DateTime ReadDateTime(int slot);
+      float ReadFloat(int slot);
+      double ReadDouble(int slot);
       Guid ReadGuid(int slot);
       object ReadNull(int slot);
 

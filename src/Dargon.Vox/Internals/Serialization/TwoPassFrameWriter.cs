@@ -61,6 +61,12 @@ namespace Dargon.Vox.Internals.Serialization {
             WriteString(slot, (string)(object)subject);
          } else if (typeof(U) == typeof(Type)) {
             WriteType(slot, (Type)(object)subject);
+         } else if (typeof(U) == typeof(DateTime)) {
+            WriteDateTime(slot, (DateTime)(object)subject);
+         } else if (typeof(U) == typeof(float)) {
+            WriteFloat(slot, (float)(object)subject);
+         } else if (typeof(U) == typeof(double)) {
+            WriteDouble(slot, (double)(object)subject);
          } else if (typeof(U) == typeof(Guid)) {
             WriteGuid(slot, (Guid)(object)subject);
          } else if (typeof(IEnumerable).IsAssignableFrom(typeof(U))) {
@@ -159,9 +165,9 @@ namespace Dargon.Vox.Internals.Serialization {
          }
       }
 
-      private void WriteNumeric_Int32Range(int slot, int value) {
+      private unsafe void WriteNumeric_Int32Range(int slot, int value) {
          if (isDryPass) {
-            fakeWriter.Position += TypeId.Int32.ComputeTypeIdLength() + sizeof(short);
+            fakeWriter.Position += TypeId.Int32.ComputeTypeIdLength() + sizeof(int);
          } else {
             output.WriteTypeId(TypeId.Int32);
             output.WriteByte((byte)(value & 0xFF));
@@ -190,6 +196,33 @@ namespace Dargon.Vox.Internals.Serialization {
 
       public void WriteType(int slot, Type type) {
          WriteTypeVisitor.Visit(this, slot, type);
+      }
+
+      public void WriteDateTime(int slot, DateTime dateTime) {
+         if (isDryPass) {
+            fakeWriter.Position += TypeId.DateTime.ComputeTypeIdLength() + sizeof(long);
+         } else {
+            output.WriteTypeId(TypeId.DateTime);
+            output.WriteBytes(BitConverter.GetBytes((long)dateTime.Ticks));
+         }
+      }
+
+      public void WriteFloat(int slot, float value) {
+         if (isDryPass) {
+            fakeWriter.Position += TypeId.Float.ComputeTypeIdLength() + sizeof(float);
+         } else {
+            output.WriteTypeId(TypeId.Float);
+            output.WriteBytes(BitConverter.GetBytes(value));
+         }
+      }
+
+      public void WriteDouble(int slot, double value) {
+         if (isDryPass) {
+            fakeWriter.Position += TypeId.Double.ComputeTypeIdLength() + sizeof(double);
+         } else {
+            output.WriteTypeId(TypeId.Double);
+            output.WriteBytes(BitConverter.GetBytes(value));
+         }
       }
 
       public void WriteType<T>(int slot) {

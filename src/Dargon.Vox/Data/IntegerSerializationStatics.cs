@@ -12,5 +12,11 @@ namespace Dargon.Vox.Data {
          var d = (uint)reader.ReadByte();
          return a | (b << 8) | (c << 16) | (d << 24);
       }
+
+      public static ulong ReadUInt64(this IForwardDataReader reader) {
+         ulong low = ReadUInt32(reader);
+         ulong high = ReadUInt32(reader);
+         return low | (high << 32);
+      }
    }
 }

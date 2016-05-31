@@ -12,7 +12,7 @@ namespace Dargon.Messages {
          new VariableIntegerSerializationStatics_AcceptanceTests().Numbers_From_NegTwoPow13_To_Neg2Pow6Min1_Take_Two_Bytes();
          new VariableIntegerSerializationStatics_AcceptanceTests().Serialized_Zero_Is_Zero_Byte();
 
-         new VariableIntegerSerializationStatics_RoundTripTests().EdgeCases();
+         new VariableIntegerSerializationStatics_RoundTripTests().EdgeCasesInts();
       }
    }
 }

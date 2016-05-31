@@ -4,7 +4,7 @@
     },
 
     "dependencies": {
-        "Dargon.Vox": "",
-        "NMockito": ""
+        "Dargon.Vox": "*",
+        "NMockito": "*"
     }
 }

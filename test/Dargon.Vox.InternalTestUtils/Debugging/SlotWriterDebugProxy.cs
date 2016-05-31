@@ -52,6 +52,21 @@ namespace Dargon.Vox.InternalTestUtils.Debugging {
          target.WriteType(slot, type);
       }
 
+      public void WriteDateTime(int slot, DateTime dateTime) {
+         Out(slot, "Write DateTime: " + dateTime);
+         target.WriteDateTime(slot, dateTime);
+      }
+
+      public void WriteFloat(int slot, float value) {
+         Out(slot, "Write Float: " + value);
+         target.WriteFloat(slot, value);
+      }
+
+      public void WriteDouble(int slot, double value) {
+         Out(slot, "Write Double: " + value);
+         target.WriteDouble(slot, value);
+      }
+
       public void WriteNull(int slot) {
          Out(slot, "Write Null");
          target.WriteNull(slot);

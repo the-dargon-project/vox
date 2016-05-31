@@ -47,7 +47,8 @@ namespace Dargon.Vox.Utilities {
          if (parameterTypes.Length >= 1) emitter.Emit(OpCodes.Ldarg_0);
          if (parameterTypes.Length >= 2) emitter.Emit(OpCodes.Ldarg_1);
          if (parameterTypes.Length >= 3) emitter.Emit(OpCodes.Ldarg_2);
-         if (parameterTypes.Length >= 4) throw new NotImplementedException();
+         if (parameterTypes.Length >= 4) emitter.Emit(OpCodes.Ldarg_3);
+         if (parameterTypes.Length >= 5) throw new NotImplementedException();
          emitter.Emit(OpCodes.Call, methodInfo);
          if (methodInfo.ReturnType.IsValueType && !invokeMethod.ReturnType.IsValueType) {
             emitter.Emit(OpCodes.Box, methodInfo.ReturnType);

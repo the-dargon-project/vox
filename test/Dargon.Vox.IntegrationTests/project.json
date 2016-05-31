@@ -4,12 +4,12 @@
     },
 
     "dependencies": {
-        "Dargon.Vox": "",
-        "Dargon.Vox.InternalTestUtils": "",
-        "NMockito": ""
+        "Dargon.Vox": "*",
+        "Dargon.Vox.InternalTestUtils": "*",
+        "NMockito": "*"
     },
 
-    "compilationOptions": {
+    "buildOptions": {
         "emitEntryPoint": true
     },
 

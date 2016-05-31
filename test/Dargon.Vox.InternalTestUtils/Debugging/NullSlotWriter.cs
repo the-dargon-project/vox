@@ -10,6 +10,10 @@ namespace Dargon.Vox.InternalTestUtils.Debugging {
       public void WriteNumeric(int slot, int val) {}
       public void WriteString(int slot, string s) {}
       public void WriteType(int slot, Type type) {}
+      public void WriteDateTime(int slot, DateTime dateTime) {}
+      public void WriteFloat(int slot, float value) {}
+      public void WriteDouble(int slot, double value) {}
+
       public void WriteGuid(int slot, Guid guid) {}
       public void WriteNull(int slot) {}
       public void WriteCollection<TElement, TCollection>(int slot, TCollection collection) where TCollection : IEnumerable<TElement> {}
