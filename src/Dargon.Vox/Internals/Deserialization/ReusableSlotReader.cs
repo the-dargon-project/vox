@@ -5,10 +5,11 @@ using Dargon.Vox.Slots;
 using Dargon.Vox.Utilities;
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using Dargon.Commons.Collections;
+using SCG = System.Collections.Generic;
 
 namespace Dargon.Vox.Internals.Deserialization {
    public class ReusableSlotReader : ISlotReader {
@@ -80,23 +81,30 @@ namespace Dargon.Vox.Internals.Deserialization {
       public Guid ReadGuid(int slot) => ReadHelper<Guid>(slot);
       public object ReadNull(int slot) => ReadHelper<NullType>(slot);
 
-      public TCollection ReadCollection<TElement, TCollection>(int slot) where TCollection : IEnumerable<TElement> {
+      public TCollection ReadCollection<TElement, TCollection>(int slot) where TCollection : SCG.IEnumerable<TElement> {
          ISerializationBox box;
-         if (GenericTypeUnpacker<TElement>.Definition == typeof(KeyValuePair<,>)) {
+         if (GenericTypeUnpacker<TElement>.Definition == typeof(SCG.KeyValuePair<,>)) {
             box = ReadNonpolymorphicHelperMapBoxVisitor<TElement>.Visit(this, slot);
          } else {
             box = ReadHelper<ArrayBox<TElement>>(slot);
          }
          var elements = (TElement[])box.Unbox();
-         if (typeof(TCollection).IsAssignableFrom(typeof(TElement[]))) {
+         var returnedCollectionType = typeof(TCollection);
+         if (returnedCollectionType.IsAssignableFrom(typeof(TElement[]))) {
             return (TCollection)(object)elements;
          }
-         var constructor = typeof(TCollection).GetConstructor(new[] { typeof(IEnumerable<TElement>) });
-         if (constructor != null) {
-            return (TCollection)Activator.CreateInstance(typeof(TCollection), elements);
+         if (returnedCollectionType.IsGenericType && returnedCollectionType.GetGenericTypeDefinition() == typeof(SCG.IReadOnlyDictionary<,>)) {
+            returnedCollectionType = typeof(SCG.Dictionary<,>).MakeGenericType(returnedCollectionType.GetGenericArguments());
          }
-         var type = typeof(TCollection);
-         var instance = (TCollection)Activator.CreateInstance(typeof(TCollection));
+         if (returnedCollectionType.IsGenericType && returnedCollectionType.GetGenericTypeDefinition() == typeof(IReadOnlySet<>)) {
+            returnedCollectionType = typeof(HashSet<>).MakeGenericType(returnedCollectionType.GetGenericArguments());
+         }
+         var constructor = returnedCollectionType.GetConstructor(new[] { typeof(SCG.IEnumerable<TElement>) });
+         if (constructor != null) {
+            return (TCollection)Activator.CreateInstance(returnedCollectionType, elements);
+         }
+         var type = returnedCollectionType;
+         var instance = (TCollection)Activator.CreateInstance(returnedCollectionType);
          var add = type.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
                        .FirstOrDefault(m => m.Name.Contains("Add") && m.GetParameters().Length == 1) ?? type.GetMethod("Enqueue");
          foreach (var element in elements) {
