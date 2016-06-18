@@ -4,10 +4,10 @@
     },
 
     "dependencies": {
+        "Castle.Core": "3.3.3",
         "Dargon.Vox": "*",
         "Dargon.Vox.InternalTestUtils": "*",
-        "NMockito": "*",
-        "Nito.AsyncEx": "3.0.1",
+        "NMockito": "*"
     },
 
     "buildOptions": {
@@ -15,7 +15,7 @@
     },
 
     "commands": {
-        "Dargon.Vox.IntegrationTests": "Dargon.Vox.IntegrationTests"
+        "Dargon.Vox.FunctionalTests": "Dargon.Vox.FunctionalTests"
     },
     
     "exclude": [ "**/o_/**/*.cs" ]

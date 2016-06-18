@@ -6,5 +6,7 @@
     "dependencies": {
         "Dargon.Vox": "*",
         "NMockito": "*"
-    }
+    },
+
+    "exclude": [ "**/o_/**/*.cs" ]
 }

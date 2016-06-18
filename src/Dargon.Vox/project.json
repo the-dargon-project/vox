@@ -12,5 +12,7 @@
 
     "compilationOptions": {
         "allowUnsafe": true
-    }
+    },
+
+    "exclude": [ "**/o_/**/*.cs" ]
 }
