@@ -119,7 +119,7 @@ namespace Dargon.Vox {
          }
       }
 
-      public static object DoIt(object[] elements, Type collectionEnumerableType, Type returnedCollectionType) {
+      public static object DoIt(Array elements, Type collectionEnumerableType, Type returnedCollectionType) {
          return RecursiveCollectionTypeConversionHelper(elements, returnedCollectionType);
       }
    }
@@ -147,7 +147,7 @@ namespace Dargon.Vox {
          using (dest.ReserveLength())
          using (var countReservation = dest.ReserveCount()) {
             int count = 0;
-            foreach (var x in (SCG.IEnumerable<object>)subject) {
+            foreach (var x in (IEnumerable)subject) {
                count++;
                thingReaderWriterDispatcherThing.WriteThing(dest, x);
             }
@@ -160,9 +160,10 @@ namespace Dargon.Vox {
          using (var ms = new MemoryStream(reader.ReadBytes(dataLength)))
          using (var dataReader = new BinaryReader(ms)) {
             var elementCount = VarIntSerializer.ReadVariableInt(dataReader.ReadByte);
-            var elements = (object[])Array.CreateInstance(elementType, elementCount);
-            for (var i = 0; i < elementCount; i++) {
-               elements[i] = thingReaderWriterDispatcherThing.ReadThing(dataReader, null);
+            var elements = Array.CreateInstance(elementType, elementCount);
+            for (var i = 0; i < elements.Length; i++) {
+               var thing = thingReaderWriterDispatcherThing.ReadThing(dataReader, null);
+               elements.SetValue(thing, i);
             }
             return ArrayToVectorlikeConverterThing.DoIt(elements, enumerableType, vectorlikeCollectionType);
          }
