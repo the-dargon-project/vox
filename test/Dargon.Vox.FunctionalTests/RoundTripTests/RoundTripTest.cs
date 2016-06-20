@@ -92,8 +92,7 @@ namespace Dargon.Vox.RoundTripTests {
                   } else if (val is IEnumerable) {
                      var e1 = ((IEnumerable)val).Cast<object>().ToArray();
                      var e2 = ((IEnumerable)val2).Cast<object>().ToArray();
-                     AssertSequenceEquals(e1, e2);
-                     e1.Zip(e2, Tuple.Create).ForEach(t => AssertEquals(t.Item1?.GetType(), t.Item2?.GetType()));
+                     AssertCollectionDeepEquals(e1, e2);
                   } else {
                      AssertEquals(val, val2);
                   }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Text;
 using Dargon.Commons.Exceptions;
 using Dargon.Vox.Internals.TypePlaceholders;
 
@@ -22,6 +23,30 @@ namespace Dargon.Vox {
 
       public object ReadBody(BinaryReader reader) {
          return typeReader.ReadType(reader.ReadByte);
+      }
+   }
+
+   public class StringThingReaderWriter : IThingReaderWriter {
+      private readonly FullTypeBinaryRepresentationCache fullTypeBinaryRepresentationCache;
+
+      public StringThingReaderWriter(FullTypeBinaryRepresentationCache fullTypeBinaryRepresentationCache) {
+         this.fullTypeBinaryRepresentationCache = fullTypeBinaryRepresentationCache;
+      }
+
+      public void WriteThing(SomeMemoryStreamWrapperThing dest, object subject) {
+         dest.Write(fullTypeBinaryRepresentationCache.GetOrCompute(typeof(string)));
+
+         var str = (string)subject;
+         using(dest.ReserveLength()) {
+            var bytes = Encoding.UTF8.GetBytes(str);
+            dest.Write(bytes);
+         }
+      }
+
+      public object ReadBody(BinaryReader reader) {
+         var length = VarIntSerializer.ReadVariableInt(reader.ReadByte);
+         var bytes = reader.ReadBytes(length);
+         return Encoding.UTF8.GetString(bytes);
       }
    }
 

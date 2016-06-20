@@ -1,10 +1,11 @@
 ﻿using Dargon.Commons.Collections;
+using Dargon.Vox.Utilities;
 using System;
 using System.Collections;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using Dargon.Commons;
 using SCG = System.Collections.Generic;
 
 namespace Dargon.Vox {
@@ -26,123 +27,183 @@ namespace Dargon.Vox {
       }
 
       public IThingReaderWriter Create(Type arg) {
-         if (arg.IsArray) {
-            return new VectorlikeReaderWriter(fullTypeBinaryRepresentationCache, thisIsTotesTheRealLegitThingReaderWriterThing, arg);
-         } else if (typeof(IEnumerable).IsAssignableFrom(arg)) {
-            var enumerableType = EnumerableUtilities.GetGenericIEnumerableInterfaceType(arg);
-            var elementType = enumerableType.GetGenericArguments()[0];
-            if (elementType.IsGenericType && elementType.GetGenericTypeDefinition() == typeof(SCG.KeyValuePair<,>)) {
-               throw new NotImplementedException();
-            } else {
-               return new VectorlikeReaderWriter(fullTypeBinaryRepresentationCache, thisIsTotesTheRealLegitThingReaderWriterThing, arg);
-            }
-         } else  {
+         if (arg.IsArray || typeof(IEnumerable).IsAssignableFrom(arg)) {
+            return new CollectionReaderWriter(fullTypeBinaryRepresentationCache, thisIsTotesTheRealLegitThingReaderWriterThing, arg);
+         } else if (arg.IsGenericType && arg.GetGenericTypeDefinition() == typeof(SCG.KeyValuePair<,>)) {
+            return new KeyValuePairReaderWriter(fullTypeBinaryRepresentationCache, thisIsTotesTheRealLegitThingReaderWriterThing, arg);
+         } else {
             throw new NotImplementedException();
          }
       }
    }
 
-   public static class EnumerableUtilities {
-      private static readonly ConcurrentDictionary<Type, Type> typeSimplifyingMapThingNamingStuffIsHard = new ConcurrentDictionary<Type, Type>();
+   public class KeyValuePairReaderWriter : IThingReaderWriter {
+      private readonly FullTypeBinaryRepresentationCache fullTypeBinaryRepresentationCache;
+      private readonly ThisIsTotesTheRealLegitThingReaderWriterThing thisIsTotesTheRealLegitThingReaderWriterThing;
+      private readonly Type userKvpType;
+      private readonly Type userKeyType;
+      private readonly Type userValueType;
+      private readonly Type simplifiedKvpType;
 
-      public static Type GetGenericIEnumerableInterfaceType(Type genericType) {
-         return genericType.GetInterfaces()
-                           .FirstOrDefault(i => i.Name.Contains(nameof(IEnumerable)) && i.IsGenericType);
+      public KeyValuePairReaderWriter(FullTypeBinaryRepresentationCache fullTypeBinaryRepresentationCache, ThisIsTotesTheRealLegitThingReaderWriterThing thisIsTotesTheRealLegitThingReaderWriterThing, Type userKvpType) {
+         this.fullTypeBinaryRepresentationCache = fullTypeBinaryRepresentationCache;
+         this.thisIsTotesTheRealLegitThingReaderWriterThing = thisIsTotesTheRealLegitThingReaderWriterThing;
+
+         Trace.Assert(userKvpType.IsGenericType && userKvpType.GetGenericTypeDefinition() == typeof(SCG.KeyValuePair<,>));
+         this.userKvpType = userKvpType;
+         var genericArguments = userKvpType.GetGenericArguments();
+         this.userKeyType = genericArguments[0];
+         this.userValueType = genericArguments[1];
+         this.simplifiedKvpType = EnumerableUtilities.SimplifyType(userKvpType);
       }
 
-      public static Type SimplifyType(Type type) {
-         if (!type.IsGenericType && !type.IsArray) {
-            return type;
+      public void WriteThing(SomeMemoryStreamWrapperThing dest, object subject) {
+         dest.Write(fullTypeBinaryRepresentationCache.GetOrCompute(simplifiedKvpType));
+
+         using (dest.ReserveLength()) {
+            dynamic s = subject;
+            thisIsTotesTheRealLegitThingReaderWriterThing.WriteThing(dest, s.Key);
+            thisIsTotesTheRealLegitThingReaderWriterThing.WriteThing(dest, s.Value);
          }
-         return typeSimplifyingMapThingNamingStuffIsHard.GetOrAdd(type, SimplifyCollectionType);
       }
 
-      private static Type SimplifyCollectionType(Type genericType) {
-         var enumerableInterfaceType = GetGenericIEnumerableInterfaceType(genericType);
-         if (enumerableInterfaceType == null) {
-            return genericType;
+      public object ReadBody(BinaryReader reader) {
+         var length = VarIntSerializer.ReadVariableInt(reader.ReadByte);
+         using (var ms = new MemoryStream(reader.ReadBytes(length)))
+         using (var msReader = new BinaryReader(ms)) {
+            var key = thisIsTotesTheRealLegitThingReaderWriterThing.ReadThing(msReader, userKeyType);
+            var value = thisIsTotesTheRealLegitThingReaderWriterThing.ReadThing(msReader, userValueType);
+            return Activator.CreateInstance(userKvpType, key, value);
          }
-         var elementType = SimplifyCollectionType(enumerableInterfaceType.GetGenericArguments()[0]);
-         if (elementType.IsGenericType &&
-            elementType.GetGenericTypeDefinition() == typeof(SCG.KeyValuePair<,>)) {
-            var kvpGenericArgs = elementType.GetGenericArguments();
-            return typeof(SCG.Dictionary<,>).MakeGenericType(kvpGenericArgs);
-         }
-         return elementType.MakeArrayType();
       }
    }
 
-   public static class ArrayToVectorlikeConverterThing {
+   public static class InternalRepresentationToHintTypeConverter {
+      private delegate IEnumerable CastFunc(IEnumerable x);
+
+      private static IGenericFlyweightFactory<CastFunc> castFuncs
+         = GenericFlyweightFactory.ForMethod<CastFunc>(
+            typeof(Enumerable),
+            nameof(Enumerable.Cast));
+
       private static object[] ShallowCloneArrayToType(object[] elements, Type destinationArrayElementType) {
          var result = (object[])Array.CreateInstance(destinationArrayElementType, elements.Length);
          for (var i = 0; i < elements.Length; i++) {
-            result[i] = RecursiveCollectionTypeConversionHelper(elements[i], destinationArrayElementType);
+            result[i] = ConvertCollectionToHintType(elements[i], destinationArrayElementType);
          }
          return result;
       }
 
-      private static object RecursiveCollectionTypeConversionHelper(object subject, Type destinationType) {
-         if (!typeof(IEnumerable).IsAssignableFrom(destinationType)) {
-            return subject;
-         }
+      private static IEnumerable ShallowCloneDictionaryToType(IEnumerable dictionary, Type destinationKvpType) {
+         Trace.Assert(destinationKvpType.GetGenericTypeDefinition() == typeof(SCG.KeyValuePair<,>));
 
-         if (destinationType == subject.GetType()) {
-            return subject;
-         }
-         if (destinationType.IsGenericType && destinationType.GetGenericTypeDefinition() == typeof(SCG.IReadOnlyDictionary<,>)) {
-            destinationType = typeof(SCG.Dictionary<,>).MakeGenericType(destinationType.GetGenericArguments());
-         }
-         if (destinationType.IsGenericType && destinationType.GetGenericTypeDefinition() == typeof(IReadOnlySet<>)) {
-            destinationType = typeof(HashSet<>).MakeGenericType(destinationType.GetGenericArguments());
-         }
+         var genericArgs = destinationKvpType.GetGenericArguments();
+         var keyType = genericArgs[0];
+         var valueType = genericArgs[1];
 
-         var subjectElements = (object[])subject;
-
-         if (destinationType.IsArray) {
-            return ShallowCloneArrayToType(subjectElements, destinationType.GetElementType());
-         } else {
-            var destinationEnumerableType = EnumerableUtilities.GetGenericIEnumerableInterfaceType(destinationType);
-            var destinationElementType = destinationEnumerableType.GetGenericArguments()[0];
-            var constructor = destinationType.GetConstructor(new[] { destinationEnumerableType });
-            if (constructor != null) {
-               var shallowClonedCastedElements = ShallowCloneArrayToType(subjectElements, destinationElementType);
-               return constructor.Invoke(new object[] { shallowClonedCastedElements });
-            }
-            var type = destinationType;
-            var instance = Activator.CreateInstance(destinationType);
-            var add = type.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
-                          .FirstOrDefault(m => m.Name.Contains("Add") && m.GetParameters().Length == 1) ?? type.GetMethod("Enqueue");
-            foreach (var element in subjectElements) {
-               add.Invoke(instance, new object[] { element });
-            }
-            return instance;
+         var listType = typeof(SCG.List<>).MakeGenericType(destinationKvpType);
+         var result = Activator.CreateInstance(listType);
+         var add = listType.GetMethods().First(m => m.Name == "Add" && m.GetParameters().Length == 1 && m.GetParameters()[0].ParameterType == destinationKvpType);
+         var enumerator = dictionary.GetEnumerator();
+         while (enumerator.MoveNext()) {
+            dynamic kvp = enumerator.Current;
+            var key = ConvertCollectionToHintType(kvp.Key, keyType);
+            var value = ConvertCollectionToHintType(kvp.Value, valueType);
+            var castedIntermediateKvp = Activator.CreateInstance(destinationKvpType, key, value);
+            add.Invoke(result, new object [] { castedIntermediateKvp });
          }
+         return (IEnumerable)result;
       }
 
-      public static object DoIt(Array elements, Type collectionEnumerableType, Type returnedCollectionType) {
-         return RecursiveCollectionTypeConversionHelper(elements, returnedCollectionType);
+      public static object ConvertCollectionToHintType(object collection, Type hintType) {
+         // fast fail on non-collections, since we aren't converting them.
+         if (!typeof(IEnumerable).IsAssignableFrom(hintType)) {
+            return collection;
+         }
+
+         // TODO: This will fail on nulls right now
+         if (hintType.IsInstanceOfType(collection)) {
+            return collection;
+         }
+
+         // If hintType is IROD/IROS, up that to the Dictionary default, since we can't 
+         // construct an interface.
+         // TODO: All sets are IROS, all dicts are IROD, so is this an impossible code path?
+         if (hintType.IsGenericType && hintType.GetGenericTypeDefinition() == typeof(SCG.IReadOnlyDictionary<,>)) {
+            hintType = typeof(SCG.Dictionary<,>).MakeGenericType(hintType.GetGenericArguments());
+         }
+         if (hintType.IsGenericType && hintType.GetGenericTypeDefinition() == typeof(IReadOnlySet<>)) {
+            hintType = typeof(HashSet<>).MakeGenericType(hintType.GetGenericArguments());
+         }
+
+         var enumerableType = EnumerableUtilities.GetGenericIEnumerableInterfaceTypeOrNull(hintType);
+         var elementType = EnumerableUtilities.GetEnumerableElementType(enumerableType);
+
+         if (EnumerableUtilities.IsDictionaryLikeType(hintType)) {
+            // e.g. KeyValuePair<TKey, TValue>[]
+            var subjectKvpVectorLike = (IEnumerable)collection;
+            var shallowClonedCastedElements = ShallowCloneDictionaryToType(subjectKvpVectorLike, elementType);
+
+            // invoke .ctor(IEnumerable<KVP<TKey, TVal>>)
+            var constructor = hintType.GetConstructor(new[] { enumerableType });
+            if (constructor != null) {
+               return constructor.Invoke(new object[] { shallowClonedCastedElements });
+            }
+
+            // invoke .ctor(), then Add/Enqueue of collection type
+            var instance = Activator.CreateInstance(hintType);
+            var add = hintType.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+                              .FirstOrDefault(m => m.Name.Contains("Add") && m.GetParameters().Length == 2);
+            
+            foreach (var kvpObject in shallowClonedCastedElements) {
+               dynamic kvp = kvpObject;
+               add.Invoke(instance, new object[] { kvp.Key, kvp.Value });
+            }
+            return instance;
+         } else {
+            // Vector-like case
+            var subjectElements = (object[])collection;
+
+            if (hintType.IsArray) {
+               return ShallowCloneArrayToType(subjectElements, hintType.GetElementType());
+            } else {
+               // Invoke .ctor(IEnumerable<TElement>)
+               var constructor = hintType.GetConstructor(new[] { enumerableType });
+               if (constructor != null) {
+                  var shallowClonedCastedElements = ShallowCloneArrayToType(subjectElements, elementType);
+                  return constructor.Invoke(new object[] { shallowClonedCastedElements });
+               }
+
+               // Invoke .ctor(), then Add/Enqueue(TElement)
+               var instance = Activator.CreateInstance(hintType);
+               var add = hintType.GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+                                 .FirstOrDefault(m => m.Name.Contains("Add") && m.GetParameters().Length == 1) ?? hintType.GetMethod("Enqueue");
+               foreach (var element in subjectElements) {
+                  add.Invoke(instance, new object[] { element });
+               }
+               return instance;
+            }
+         }
       }
    }
 
-   public class VectorlikeReaderWriter : IThingReaderWriter {
+   public class CollectionReaderWriter : IThingReaderWriter {
       private readonly FullTypeBinaryRepresentationCache fullTypeBinaryRepresentationCache;
       private readonly ThisIsTotesTheRealLegitThingReaderWriterThing thingReaderWriterDispatcherThing;
-      private readonly Type vectorlikeCollectionType;
-      private readonly Type arraySimplifiedCollectionType;
+      private readonly Type userCollectionType;
+      private readonly Type simplifiedCollectionType;
       private readonly Type elementType;
-      private readonly Type enumerableType;
 
-      public VectorlikeReaderWriter(FullTypeBinaryRepresentationCache fullTypeBinaryRepresentationCache, ThisIsTotesTheRealLegitThingReaderWriterThing thingReaderWriterDispatcherThing, Type vectorlikeCollectionType) {
+      public CollectionReaderWriter(FullTypeBinaryRepresentationCache fullTypeBinaryRepresentationCache, ThisIsTotesTheRealLegitThingReaderWriterThing thingReaderWriterDispatcherThing, Type userCollectionType) {
          this.fullTypeBinaryRepresentationCache = fullTypeBinaryRepresentationCache;
          this.thingReaderWriterDispatcherThing = thingReaderWriterDispatcherThing;
-         this.vectorlikeCollectionType = vectorlikeCollectionType;
-         this.arraySimplifiedCollectionType = EnumerableUtilities.SimplifyType(vectorlikeCollectionType);
-         this.elementType = arraySimplifiedCollectionType.GetElementType();
-         this.enumerableType = typeof(SCG.IEnumerable<>).MakeGenericType(elementType);
+         this.userCollectionType = userCollectionType;
+         this.simplifiedCollectionType = EnumerableUtilities.SimplifyType(userCollectionType);
+         this.elementType = EnumerableUtilities.GetEnumerableElementType(simplifiedCollectionType);
       }
 
       public void WriteThing(SomeMemoryStreamWrapperThing dest, object subject) {
-         dest.Write(fullTypeBinaryRepresentationCache.GetOrCompute(arraySimplifiedCollectionType));
+         dest.Write(fullTypeBinaryRepresentationCache.GetOrCompute(simplifiedCollectionType));
 
          using (dest.ReserveLength())
          using (var countReservation = dest.ReserveCount()) {
@@ -165,7 +226,7 @@ namespace Dargon.Vox {
                var thing = thingReaderWriterDispatcherThing.ReadThing(dataReader, null);
                elements.SetValue(thing, i);
             }
-            return ArrayToVectorlikeConverterThing.DoIt(elements, enumerableType, vectorlikeCollectionType);
+            return InternalRepresentationToHintTypeConverter.ConvertCollectionToHintType(elements, userCollectionType);
          }
       }
    }

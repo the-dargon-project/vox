@@ -5,20 +5,27 @@ using static Dargon.Commons.Channels.ChannelsExtensions;
 namespace Dargon.Vox {
    public class Program {
       public static void Main() {
-//         new TypeRoundTripFT().TypeRoundTripTest();
-//         new TypeRoundTripFT().TypeArrayRoundTripTest();
-//         new TypeRoundTripFT().TypeArrayArrayRoundTripTest();
-//         new VectorLikeRoundtripFT().ArrayEasyTest();
-//         new VectorLikeRoundtripFT().ArrayHardTest1();
-//         new VectorLikeRoundtripFT().ArrayHardTest2();
-//         new VectorLikeRoundtripFT().ListEasyTest();
-//         new VectorLikeRoundtripFT().ListHardTest1();
-//         new VectorLikeRoundtripFT().ListHardTest2();
+//         new DictionaryLikeRoundtripFT().EasyTest();
+//         new DictionaryLikeRoundtripFT().HardTest1();
+         new DictionaryLikeRoundtripFT().HardTest2();
+         return;
 
-//         new BooleanRoundtripFT().TrueRoundTripTest();
-//         new BooleanRoundtripFT().FalseRoundTripTest();
-//         new BooleanRoundtripFT().ThisIsMaybeProbablyTotallyGoingToBreaktest();
+         new TypeRoundTripFT().TypeRoundTripTest();
+         new TypeRoundTripFT().TypeArrayRoundTripTest();
+         new TypeRoundTripFT().TypeArrayArrayRoundTripTest();
+         new VectorLikeRoundtripFT().ArrayEasyTest();
+         new VectorLikeRoundtripFT().ArrayHardTest1();
+         new VectorLikeRoundtripFT().ArrayHardTest2();
+         new VectorLikeRoundtripFT().ListEasyTest();
+         new VectorLikeRoundtripFT().ListHardTest1();
+         new VectorLikeRoundtripFT().ListHardTest2();
 
+         new BooleanRoundtripFT().TrueRoundTripTest();
+         new BooleanRoundtripFT().FalseRoundTripTest();
+         new BooleanRoundtripFT().ThisIsMaybeProbablyTotallyGoingToBreaktest();
+
+         new StringRoundTripFT().StringRoundTripTest();
+         new StringRoundTripFT().StringArrayRoundTripTest();
 
 
          //         new BytesIT().ByteArrays();

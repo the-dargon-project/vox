@@ -22,7 +22,7 @@ namespace Dargon.Vox {
          s.Push(arg);
          while (s.Count != 0) {
             var t = s.Pop();
-            if (t.IsArray) {
+            if (t.IsArray && t != typeof(string)) {
                s.Push(typeof(Array));
                s.Push(t.GetElementType());
             } else if (t.IsGenericType && !t.IsGenericTypeDefinition) {

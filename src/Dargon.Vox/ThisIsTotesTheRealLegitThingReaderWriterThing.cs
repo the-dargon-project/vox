@@ -2,6 +2,7 @@
 using System.IO;
 using Dargon.Commons.Exceptions;
 using Dargon.Vox.Internals.TypePlaceholders;
+using Dargon.Vox.Utilities;
 
 namespace Dargon.Vox {
    public class ThisIsTotesTheRealLegitThingReaderWriterThing {

@@ -17,16 +17,17 @@ namespace Dargon.Vox {
          typeRegistry.RegisterReservedTypeId(typeof(object), (int)TypeId.Object, () => new object());
          typeRegistry.RegisterReservedTypeId(typeof(Array), (int)TypeId.Array);
          typeRegistry.RegisterReservedTypeId(typeof(Dictionary<,>), (int)TypeId.Map);
+         typeRegistry.RegisterReservedTypeId(typeof(KeyValuePair<,>), (int)TypeId.KeyValuePair);
 
          var fullTypeBinaryRepresentationCache = new FullTypeBinaryRepresentationCache(typeRegistry);
          var typeReader = new TypeReader(typeRegistry);
-
          var thingReaderWriterFactory = new ThingReaderWriterFactory(fullTypeBinaryRepresentationCache);
          var thingReaderWriterContainer = new ThingReaderWriterContainer(thingReaderWriterFactory);
-         thingReaderWriterContainer.AddOrThrow(typeof(Type), new TypeThingReaderWriter(fullTypeBinaryRepresentationCache, typeReader));
+         thingReaderWriterContainer.AddOrThrow(typeof(string), new StringThingReaderWriter(fullTypeBinaryRepresentationCache));
          thingReaderWriterContainer.AddOrThrow(typeof(bool), new BoolThingReaderWriter());
          thingReaderWriterContainer.AddOrThrow(typeof(TBoolTrue), new BoolTrueThingReaderWriter(fullTypeBinaryRepresentationCache));
          thingReaderWriterContainer.AddOrThrow(typeof(TBoolFalse), new BoolFalseThingReaderWriter(fullTypeBinaryRepresentationCache));
+         thingReaderWriterContainer.AddOrThrow(typeof(Type), new TypeThingReaderWriter(fullTypeBinaryRepresentationCache, typeReader));
          thingReaderWriterFactory.SetContainer(thingReaderWriterContainer);
 
          var thisIsTotesTheRealLegitThingReaderWriterThing = new ThisIsTotesTheRealLegitThingReaderWriterThing(thingReaderWriterContainer, typeReader);

@@ -23,5 +23,6 @@ namespace Dargon.Vox {
       GenericTypeIdEnd = -0x34,
       Array = -0x35,
       Map = -0x36,
+      KeyValuePair = -0x37,
    }
 }
