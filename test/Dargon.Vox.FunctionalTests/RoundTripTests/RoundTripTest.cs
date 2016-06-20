@@ -13,7 +13,8 @@ namespace Dargon.Vox.RoundTripTests {
    public class RoundTripTest : NMockitoInstance {
       protected readonly VoxSerializer serializer;
 
-      protected RoundTripTest(Type[] testTypes) {
+      protected RoundTripTest(Type[] testTypes = null) {
+         testTypes = testTypes ?? new Type[0];
          serializer = new VoxFactory().Create();
          var typeIdCounter = 0;
          var typeContextsByTypeId = testTypes.ToDictionary(

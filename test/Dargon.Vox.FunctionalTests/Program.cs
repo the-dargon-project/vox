@@ -28,6 +28,8 @@ namespace Dargon.Vox {
          new DictionaryLikeRoundtripFT().HardTest1();
          new DictionaryLikeRoundtripFT().HardTest2();
 
+         new AutoTypeSerializerRoundTripFT().SerializeTest();
+         new AutoTypeSerializerRoundTripFT().DeserializeTest();
          //         new BytesIT().ByteArrays();
          //         new BoolIT().True();
          //         new BoolIT().False();
