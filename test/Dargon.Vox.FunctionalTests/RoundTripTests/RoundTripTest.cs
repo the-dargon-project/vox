@@ -11,7 +11,7 @@ using static Dargon.Vox.VoxStatics;
 
 namespace Dargon.Vox.RoundTripTests {
    public class RoundTripTest : NMockitoInstance {
-      private VoxSerializer serializer;
+      protected readonly VoxSerializer serializer;
 
       protected RoundTripTest(Type[] testTypes) {
          serializer = new VoxFactory().Create();

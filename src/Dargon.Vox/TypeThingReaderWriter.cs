@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Specialized;
 using System.IO;
 using System.Text;
 using Dargon.Commons.Exceptions;
 using Dargon.Vox.Internals.TypePlaceholders;
+using Dargon.Vox.Utilities;
 
 namespace Dargon.Vox {
    public class TypeThingReaderWriter : IThingReaderWriter {
@@ -15,7 +17,7 @@ namespace Dargon.Vox {
       }
 
       public void WriteThing(SomeMemoryStreamWrapperThing dest, object subject) {
-         var type = (Type)subject;
+         var type = TypeSimplifier.SimplifyType((Type)subject);
          var typeBinaryRepresentation = fullTypeBinaryRepresentationCache.GetOrCompute(type);
          dest.Write(fullTypeBinaryRepresentationCache.GetOrCompute(typeof(Type)));
          dest.Write(typeBinaryRepresentation);

@@ -1,6 +1,7 @@
 ﻿using Dargon.Vox.Utilities;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using Dargon.Vox.Internals.TypePlaceholders;
 
@@ -76,6 +77,16 @@ namespace Dargon.Vox {
 
       public object Deserialize(Stream dest, Type hintType = null) {
          return frameReader.ReadFrame(dest, hintType);
+      }
+
+      public T Clone<T>(T subject) {
+         var ms = new MemoryStream();
+         Serialize(ms, subject);
+         var serializationLength = ms.Position;
+         ms.Position = 0;
+         var result = (T)Deserialize(ms, subject?.GetType());
+         Trace.Assert(ms.Position == serializationLength);
+         return result;
       }
    }
 

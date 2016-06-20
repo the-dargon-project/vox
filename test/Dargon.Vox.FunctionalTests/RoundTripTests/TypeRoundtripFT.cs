@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
@@ -66,6 +67,17 @@ namespace Dargon.Vox.RoundTripTests {
       [Fact]
       public void TypeArrayArrayRoundTripTest() {
          MultiThreadedRoundTripTest(new[] { kTypeArrayArray }, 1000, 8);
+      }
+
+      [Fact]
+      public void TypeSimplificationTest() {
+         var tests = new Dictionary<Type, Type> {
+            [typeof(GenericType1<SortedDictionary<int, string>>)] = typeof(GenericType1<Dictionary<int, string>>),
+            [typeof(GenericType1<Dictionary<List<int>, ConcurrentDictionary<string, int[]>>>)] = typeof(GenericType1<Dictionary<int[], Dictionary<string, int[]>>>)
+         };
+         foreach (var test in tests) {
+            AssertEquals(test.Value, serializer.Clone(test.Key));
+         }
       }
    }
 }

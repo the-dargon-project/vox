@@ -6,9 +6,49 @@ using Dargon.Commons;
 using Dargon.Commons.Collections;
 
 namespace Dargon.Vox.Utilities {
-   public static class EnumerableUtilities {
-      private static readonly ConcurrentDictionary<Type, Type> typeSimplifyingMapThingNamingStuffIsHard = new ConcurrentDictionary<Type, Type>();
+   public static class TypeSimplifier {
+      private static readonly ConcurrentDictionary<Type, Type> simplifiedTypeByType = new ConcurrentDictionary<Type, Type>();
 
+      public static Type SimplifyType(Type type) {
+         if (typeof(Type).IsAssignableFrom(type)) {
+            return typeof(Type);
+         } else if (type == typeof(string)) {
+            return type;
+         } else if (type.IsArray) {
+            return simplifiedTypeByType.GetOrAdd(
+               type,
+               add => SimplifyType(type.GetElementType()).MakeArrayType());
+         } else if (type.IsGenericType) {
+            return simplifiedTypeByType.GetOrAdd(type, SimplifyGenericType);
+         } else {
+            return type;
+         }
+      }
+
+      private static Type SimplifyGenericType(Type genericType) {
+         var enumerableInterfaceType = EnumerableUtilities.GetGenericIEnumerableInterfaceTypeOrNull(genericType);
+         if (enumerableInterfaceType != null) {
+            return SimplifyEnumerableType(enumerableInterfaceType);
+         } else {
+            return genericType.GetGenericTypeDefinition()
+                              .MakeGenericType(
+                                 genericType.GetGenericArguments().Map(SimplifyType)
+               );
+         }
+      }
+
+      private static Type SimplifyEnumerableType(Type enumerableInterfaceType) {
+         var elementType = SimplifyType(enumerableInterfaceType.GetGenericArguments()[0]);
+         if (elementType.IsGenericType &&
+             elementType.GetGenericTypeDefinition() == typeof(KeyValuePair<,>)) {
+            var kvpGenericArgs = elementType.GetGenericArguments();
+            return typeof(Dictionary<,>).MakeGenericType(kvpGenericArgs);
+         }
+         return elementType.MakeArrayType();
+      }
+   }
+
+   public static class EnumerableUtilities {
       public static Type GetGenericIEnumerableInterfaceTypeOrNull(Type collectionType) {
          if (collectionType.IsGenericType && collectionType.GetGenericTypeDefinition() == typeof(IEnumerable<>)) {
             return collectionType;
@@ -25,31 +65,6 @@ namespace Dargon.Vox.Utilities {
             var enumerableType = GetGenericIEnumerableInterfaceTypeOrNull(type);
             return enumerableType.GetGenericArguments()[0];
          }
-      }
-
-      public static Type SimplifyType(Type type) {
-         if ((!type.IsGenericType && !type.IsArray) || type == typeof(string)) {
-            return type;
-         }
-         if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(KeyValuePair<,>)) {
-            return typeof(KeyValuePair<,>).MakeGenericType(
-               type.GetGenericArguments().Map(SimplifyType));
-         }
-         return typeSimplifyingMapThingNamingStuffIsHard.GetOrAdd(type, SimplifyCollectionType);
-      }
-
-      private static Type SimplifyCollectionType(Type genericType) {
-         var enumerableInterfaceType = GetGenericIEnumerableInterfaceTypeOrNull(genericType);
-         if (enumerableInterfaceType == null) {
-            return genericType;
-         }
-         var elementType = SimplifyType(enumerableInterfaceType.GetGenericArguments()[0]);
-         if (elementType.IsGenericType &&
-             elementType.GetGenericTypeDefinition() == typeof(System.Collections.Generic.KeyValuePair<,>)) {
-            var kvpGenericArgs = elementType.GetGenericArguments();
-            return typeof(Dictionary<,>).MakeGenericType(kvpGenericArgs);
-         }
-         return elementType.MakeArrayType();
       }
 
       public static bool IsDictionaryLikeType(Type enumerableType) {

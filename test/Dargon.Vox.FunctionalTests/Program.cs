@@ -5,14 +5,11 @@ using static Dargon.Commons.Channels.ChannelsExtensions;
 namespace Dargon.Vox {
    public class Program {
       public static void Main() {
-//         new DictionaryLikeRoundtripFT().EasyTest();
-//         new DictionaryLikeRoundtripFT().HardTest1();
-         new DictionaryLikeRoundtripFT().HardTest2();
-         return;
-
          new TypeRoundTripFT().TypeRoundTripTest();
          new TypeRoundTripFT().TypeArrayRoundTripTest();
          new TypeRoundTripFT().TypeArrayArrayRoundTripTest();
+         new TypeRoundTripFT().TypeSimplificationTest();
+
          new VectorLikeRoundtripFT().ArrayEasyTest();
          new VectorLikeRoundtripFT().ArrayHardTest1();
          new VectorLikeRoundtripFT().ArrayHardTest2();
@@ -27,6 +24,9 @@ namespace Dargon.Vox {
          new StringRoundTripFT().StringRoundTripTest();
          new StringRoundTripFT().StringArrayRoundTripTest();
 
+         new DictionaryLikeRoundtripFT().EasyTest();
+         new DictionaryLikeRoundtripFT().HardTest1();
+         new DictionaryLikeRoundtripFT().HardTest2();
 
          //         new BytesIT().ByteArrays();
          //         new BoolIT().True();

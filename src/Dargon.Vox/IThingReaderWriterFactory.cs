@@ -54,7 +54,7 @@ namespace Dargon.Vox {
          var genericArguments = userKvpType.GetGenericArguments();
          this.userKeyType = genericArguments[0];
          this.userValueType = genericArguments[1];
-         this.simplifiedKvpType = EnumerableUtilities.SimplifyType(userKvpType);
+         this.simplifiedKvpType = TypeSimplifier.SimplifyType(userKvpType);
       }
 
       public void WriteThing(SomeMemoryStreamWrapperThing dest, object subject) {
@@ -198,7 +198,7 @@ namespace Dargon.Vox {
          this.fullTypeBinaryRepresentationCache = fullTypeBinaryRepresentationCache;
          this.thingReaderWriterDispatcherThing = thingReaderWriterDispatcherThing;
          this.userCollectionType = userCollectionType;
-         this.simplifiedCollectionType = EnumerableUtilities.SimplifyType(userCollectionType);
+         this.simplifiedCollectionType = TypeSimplifier.SimplifyType(userCollectionType);
          this.elementType = EnumerableUtilities.GetEnumerableElementType(simplifiedCollectionType);
       }
 

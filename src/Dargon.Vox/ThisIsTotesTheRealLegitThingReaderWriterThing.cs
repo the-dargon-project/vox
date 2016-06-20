@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using Dargon.Commons.Exceptions;
 using Dargon.Vox.Internals.TypePlaceholders;
@@ -17,9 +18,12 @@ namespace Dargon.Vox {
       public object ReadThing(BinaryReader thingReader, Type hintType) {
          var type = typeReader.ReadType(thingReader.ReadByte);
 
-         // TODO: HACK
-         if (hintType != null && type != typeof(TBoolTrue) && type != typeof(TBoolFalse)) {
-            var simplifiedType = EnumerableUtilities.SimplifyType(hintType);
+         if (type == typeof(TBoolTrue) || type == typeof(TBoolFalse)) {
+            // nothing
+         } else if (type == typeof(Type)) {
+            Trace.Assert(hintType == null || typeof(Type).IsAssignableFrom(hintType));
+         } else if (hintType != null) {
+            var simplifiedType = TypeSimplifier.SimplifyType(hintType);
 
             if (type != simplifiedType) {
                throw new InvalidStateException();
