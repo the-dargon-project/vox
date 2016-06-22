@@ -37,10 +37,12 @@ namespace Dargon.Vox {
          return new CountReservation(offset, Target, fredTheBanana, c => byteCount += c);
       }
 
-      public void Write(byte[] stuff) {
-         Target.Write(stuff, 0, stuff.Length);
-         bananas.Add(new FredTheBanana { Length = stuff.Length, Skip = 0 });
-         byteCount += stuff.Length;
+      public void Write(byte[] stuff) => Write(stuff, 0, stuff.Length);
+
+      public void Write(byte[] stuff, int offset, int length) {
+         Target.Write(stuff, offset, length);
+         bananas.Add(new FredTheBanana { Length = length, Skip = 0 });
+         byteCount += length;
       }
 
       public void CopyTo(Stream stream) {

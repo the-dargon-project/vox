@@ -12,16 +12,16 @@ namespace Dargon.Vox.FunctionalTests.RoundTripTests {
       };
 
       private static readonly Dictionary<string, Dictionary<string, Type[]>[]> kHardTestData1 = new Dictionary<string, Dictionary<string, Type[]>[]> {
-         ["asdf"] = new[] {
+         ["hailviral1"] = new[] {
             new Dictionary<string, Type[]> {
-               ["Fred"] = new [] { typeof(int), typeof(string), typeof(bool) },
-               ["Banana"] = new [] { typeof(int), typeof(bool), typeof(string) }
+               ["kadence696"] = new [] { typeof(int), typeof(string), typeof(bool) },
+               ["Flumpywumpy123"] = new [] { typeof(int), typeof(bool), typeof(string) }
             },
          },
          ["jkl;"] = new[] {
             new Dictionary<string, Type[]> {
-               ["saef"] = new [] { typeof(bool), typeof(int), typeof(string) },
-               ["qwe"] = new [] { typeof(string), typeof(bool), typeof(int) }
+               ["SarcasticDante"] = new [] { typeof(bool), typeof(int), typeof(string) },
+               ["N0tan3rd"] = new [] { typeof(string), typeof(bool), typeof(int) }
             },
          }
       };

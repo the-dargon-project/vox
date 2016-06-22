@@ -18,11 +18,20 @@ namespace Dargon.Vox {
       public object ReadThing(BinaryReader thingReader, Type hintType) {
          var type = typeReader.ReadType(thingReader.ReadByte);
 
-         if (type == typeof(TBoolTrue) || type == typeof(TBoolFalse)) {
-            // nothing
+         // special cases for type deserialization
+         if (type == typeof(TBoolTrue) || type == typeof(TBoolFalse) || type == typeof(TNull)) {
+            // fall straight to reader, ignoring hintType
+            return thingReaderWriterContainer.Get(type).ReadBody(thingReader);
          } else if (type == typeof(Type)) {
             Trace.Assert(hintType == null || typeof(Type).IsAssignableFrom(hintType));
-         } else if (hintType != null) {
+            return thingReaderWriterContainer.Get(type).ReadBody(thingReader);
+         } else if (type == typeof(sbyte) || type == typeof(short) || type == typeof(int) || type == typeof(long)) {
+            var value = thingReaderWriterContainer.Get(type).ReadBody(thingReader);
+            return hintType == null ? value : Convert.ChangeType(value, hintType);
+         }
+
+         // general type simplification + hinting.
+         if (hintType != null) {
             var simplifiedType = TypeSimplifier.SimplifyType(hintType);
 
             if (type != simplifiedType) {
@@ -31,7 +40,6 @@ namespace Dargon.Vox {
 
             type = hintType;
          }
-
          return thingReaderWriterContainer.Get(type).ReadBody(thingReader);
       }
 

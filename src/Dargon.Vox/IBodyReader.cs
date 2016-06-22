@@ -8,6 +8,7 @@ using System.Reflection.Emit;
 namespace Dargon.Vox {
    public interface IBodyWriter {
       void Write<T>(T val);
+      void Write(byte[] buffer, int offset, int length);
    }
 
    public interface IBodyReader {
@@ -24,6 +25,16 @@ namespace Dargon.Vox {
    public interface ISerializableType {
       void Serialize(IBodyWriter writer);
       void Deserialize(IBodyReader reader);
+   }
+
+   public class SerializableTypeTypeSerializerProxy<T> : ITypeSerializer<T> where T : ISerializableType {
+      public void Serialize(IBodyWriter writer, T source) {
+         source.Serialize(writer);
+      }
+
+      public void Deserialize(IBodyReader reader, T target) {
+         target.Deserialize(reader);
+      }
    }
 
    public class InlineTypeSerializer<T> : ITypeSerializer<T> {

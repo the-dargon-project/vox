@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using Dargon.Vox.Internals.TypePlaceholders;
 using Xunit;
 
 namespace Dargon.Vox.RoundTripTests {
@@ -21,6 +22,9 @@ namespace Dargon.Vox.RoundTripTests {
             typeof(GenericType3<,,>),
          },
          new[] {
+            typeof(object),
+            typeof(TNull),
+            typeof(void),
             typeof(int),
             typeof(string),
             typeof(Dictionary<int, string>),

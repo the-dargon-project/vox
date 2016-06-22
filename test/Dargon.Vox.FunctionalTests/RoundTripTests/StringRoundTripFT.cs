@@ -23,4 +23,21 @@ namespace Dargon.Vox.FunctionalTests.RoundTripTests {
          MultiThreadedRoundTripTest(cases, 10000, 8);
       }
    }
+
+   public class ObjectRoundTripFT : RoundTripTest {
+      [Fact]
+      public void Run() {
+         var cases = new object[] {
+            null,
+            new object()
+         };
+         MultiThreadedRoundTripTest(
+            cases, 20000, 8,
+            (a, b) => {
+               AssertTrue(
+                  (a == null && b == null) ||
+                  (a.GetType() == b.GetType() && a.GetType() == typeof(object)));
+            });
+      }
+   }
 }

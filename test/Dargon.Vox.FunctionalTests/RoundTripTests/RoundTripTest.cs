@@ -16,14 +16,14 @@ namespace Dargon.Vox.RoundTripTests {
       protected RoundTripTest(Type[] testTypes = null) {
          testTypes = testTypes ?? new Type[0];
          serializer = new VoxFactory().Create();
-         var typeIdCounter = 0;
+         var typeIdCounter = 1;
          var typeContextsByTypeId = testTypes.ToDictionary(
             testType => typeIdCounter++,
             testType => Something(testType));
          serializer.ImportTypes(new InlineVoxTypes(typeContextsByTypeId));
       }
 
-      public void MultiThreadedRoundTripTest<T>(IReadOnlyList<T> testCases, int trialsPerCase, int workerCount) {
+      public void MultiThreadedRoundTripTest<T>(IReadOnlyList<T> testCases, int trialsPerCase, int workerCount, Action<T, T> assertEqualsOverride = null) {
          var workersReadySignal = new CountdownEvent(workerCount);
          var startSignal = new ManualResetEvent(false);
          var workersCompleteSignal = new CountdownEvent(workerCount);
@@ -38,7 +38,7 @@ namespace Dargon.Vox.RoundTripTests {
                var sw = new Stopwatch();
                sw.Start();
                foreach (var testCase in testCases.Shuffle(new Random(workerId))) {
-                  RunRoundTripTest(testCase, $"Worker {workerId}: RTT {testCase}", trialsPerCase);
+                  RunRoundTripTest(testCase, $"Worker {workerId}: RTT {testCase}", trialsPerCase, assertEqualsOverride);
                }
                dts[workerId] = sw.ElapsedMilliseconds;
                workersCompleteSignal.Signal();
@@ -51,25 +51,27 @@ namespace Dargon.Vox.RoundTripTests {
          Console.WriteLine("Done in: " + dts.Join(", ") + " (avg " + (dts.Sum() / dts.Length) + " )");
       }
 
-      public void RunRoundTripTest<T>(T val, string benchmarkName = null, int benchmarkCount = -1) {
+      public void RunRoundTripTest<T>(T val, string benchmarkName = null, int benchmarkCount = -1, Action<T, T> assertEqualsOverride = null) {
          if (benchmarkCount < 0) {
-            new Runner(serializer).Run(val, 1);
+            new Runner<T>(serializer, assertEqualsOverride).Run(val, 1);
          } else {
             var sw = new Stopwatch();
             sw.Start();
-            new Runner(serializer).Run(val, benchmarkCount);
+            new Runner<T>(serializer, assertEqualsOverride).Run(val, benchmarkCount);
             Console.WriteLine($"`{benchmarkName}` benchmark completed {benchmarkCount} trials in {sw.ElapsedMilliseconds} ms");
          }
       }
 
-      public class Runner : NMockitoInstance {
+      public class Runner<T> : NMockitoInstance {
          private readonly VoxSerializer serializer;
+         private readonly Action<T, T> assertEqualsOverride;
 
-         public Runner(VoxSerializer serializer) {
+         public Runner(VoxSerializer serializer, Action<T, T> assertEqualsOverride) {
             this.serializer = serializer;
+            this.assertEqualsOverride = assertEqualsOverride;
          }
 
-         public void Run<T>(T val, int count) {
+         public void Run(T val, int count) {
             using (var ms = new MemoryStream()) {
                for (var i = 0; i < count; i++) {
                   serializer.Serialize(ms, val);
@@ -83,21 +85,34 @@ namespace Dargon.Vox.RoundTripTests {
                T[] results = Util.Generate(count, i => (T)serializer.Deserialize(ms, hintType));
                AssertEquals(length, ms.Position);
                foreach (var val2 in results) {
-                  var val2Type = val2?.GetType();
-                  if (typeof(Type).IsAssignableFrom(val2Type)) {
-                     val2Type = typeof(Type);
-                  }
-                  AssertEquals(hintType, val2Type);
-                  if (val == null) {
-                     AssertNull(val2);
-                  } else if (val is IEnumerable) {
-                     var e1 = ((IEnumerable)val).Cast<object>().ToArray();
-                     var e2 = ((IEnumerable)val2).Cast<object>().ToArray();
-                     AssertCollectionDeepEquals(e1, e2);
+                  if (assertEqualsOverride != null) {
+                     assertEqualsOverride(val, val2);
                   } else {
-                     AssertEquals(val, val2);
+                     DefaultAssertEquals(val, val2, hintType);
                   }
                }
+            }
+         }
+
+         public void DefaultAssertEquals(T expected, T actual, Type hintType) {
+            if (assertEqualsOverride != null) {
+               assertEqualsOverride(expected, actual);
+               return;
+            }
+
+            var val2Type = actual?.GetType();
+            if (typeof(Type).IsAssignableFrom(val2Type)) {
+               val2Type = typeof(Type);
+            }
+            AssertEquals(hintType, val2Type);
+            if (expected == null) {
+               AssertNull(actual);
+            } else if (expected is IEnumerable) {
+               var e1 = ((IEnumerable)expected).Cast<object>().ToArray();
+               var e2 = ((IEnumerable)actual).Cast<object>().ToArray();
+               AssertCollectionDeepEquals(e1, e2);
+            } else {
+               AssertEquals(expected, actual);
             }
          }
       }
