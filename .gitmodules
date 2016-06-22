@@ -14,3 +14,7 @@
 	path = dependencies/FodyDnx
 	url = git@github.com:ItzWarty/FodyDnx.git
 	branch = master
+[submodule "dependencies/vox"]
+	path = dependencies/vox
+	url = ssh://git@github.com/the-dargon-project/vox.git
+	branch = master

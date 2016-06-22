@@ -1,3 +1,68 @@
+Frame<T> -> length: varInt, Thing<T>
+Thing<T> -> FullType<T>, Body<T>
+FullType<bool> -> BoolTrue | BoolFalse
+FullType<T> -> count: varInt, types: varInt[]
+Body<T> ->
+case T of
+  int -> 
+  null -> 
+  Type U -> FullType<U>
+  T[] -> 
+#    t fixed_size -> length: varInt, count: varInt, Body<T>[] elements
+            else -> length: varInt, count: varInt, Thing<? : T>[] elements
+  KVP<K, V> -> length: varInt, key: Thing<? : K>, value: Thing<? : V>
+  Dict<K, V> -> length: varInt, elementCount: varInt, elements: KVP<K, V>[elementCount]
+  ? _ -> length: varInt, slotCount: varInt, slots: Thing<?>[slotCount]
+
+All object types (e.g. MessageDto) fall into Body<Object> case?
+
+E.g. Serialize payload = typeof(Dict<string, int[]>)
+     Frame<Type> -> length: ?
+                    thing: Thing<Type> -> FullType<Type> -> 1 TType
+                                                            (size: count: 1 byte + types: 1 byte = 2 bytes)
+                                          Body<Type> -> Type Dict<string, int[]> -> FullType<Dict<string, int[]> -> count: 4
+                                                                                                                    types: TInt TBeginArray TString TDict
+                                                                                                                    (size: count: 1 byte + types: 4 bytes = 5 bytes)
+                                          (size: FullType: 2 bytes + Body: 5 bytes = 7 bytes)
+                    length: 7
+                    (size: lengtH: 1 byte + thing: 7 bytes = 8 bytes)
+0           1          2              3          4             5                    6                7
+[varint 7] [varint 1] [varint TType] [varint 4] [varint TInt] [varint TBeginArray] [varint TString] [varint TDict]
+                                                                                                                    
+E.g. Deserialize payload:
+Frame<?> -> length: [varint 10]
+            Thing<T> -> FullType<T> -> count: varInt = 1
+                                       types: TType
+                        Body<Type> -> FullType<U> -> count: varInt = 6
+                                                     types: [varint TBeginGeneric] [varint TDict] [varint TString] [varint TBeginArray] [varint TInt] [varint TEndGeneric]
+                                                     (U: stack=[], in=([varint TInt] [varint TBeginArray] [varint TString] [varint TDict])
+                                                         stack=(int), in=([varint TBeginArray] [varint TString] [varint TDict])
+                                                         stack=(int[]), in=([varint TString] [varint TDict])
+                                                         stack=(int[], string), in=([varint TDict])
+                                                         stack=(Dict<string, int[]>), in=()
+                                                         => U = typeof(Dict<string, int[]>)
+                                                     )
+Frame.Thing.Body = typeof(Dict<string, int[]>)
+
+ComputeBinaryRepresentation algorithm:
+Stack is () top, final rep is begin [] end
+(A<B1, B2[]>) [] => (A<,>, B1, B2[]) []
+                 => (A<,>, B1, [], B2) []
+                 => (A<,>, B1, []) [B2]
+                 => (A<,>, B1) [B2, []]
+                 => (A<,>) [B2, [], B1]
+                 => () [B2, [], B1, A<,>]
+
+More complicated:
+(A<B1, B2<C1, C2>>) [] => (A<,>, B1, B2<C1, C2>) []
+                       => (A<,>, B1, B2<,>, C1, C2) []
+                       => (A<,>, B1, B2<,>, C1) [C2]
+                       => (A<,>, B1, B2<,>) [C2, C1]
+                       => (A<,>, B1) [C2, C1, B2<,>]
+                       => (A<,>) [C2, C1, B2<,>, B1]
+                       => () [C2, C1, B2<,>, B1, A<,>]
+
+
 T: C0 (192) - FF (255) Reserved (Note -64->63 fit in first byte)
 
 Reserved tIds: [-0x01, -0x40]

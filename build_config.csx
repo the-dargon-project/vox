@@ -1,4 +1,4 @@
-var projects = Projects("messages");
+var projects = Projects("vox");
 var dependencies = Projects("commons", "ryu", "NMockito");
 
 Export.Solution(
