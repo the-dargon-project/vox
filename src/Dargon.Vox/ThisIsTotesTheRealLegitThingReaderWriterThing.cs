@@ -30,8 +30,7 @@ namespace Dargon.Vox {
             return hintType == null ? value : Convert.ChangeType(value, hintType);
          }
 
-         // general type simplification + hinting.
-         if (hintType != null) {
+         if (hintType != null && !hintType.IsAssignableFrom(type)) {
             var simplifiedType = TypeSimplifier.SimplifyType(hintType);
 
             if (type != simplifiedType) {

@@ -50,6 +50,8 @@ namespace Dargon.Vox {
          new AutoSerializableRoundTripTest2().Hodgepodge();
          new AutoSerializableRoundTripTest2().LinkedList_String_Chain();
 
+         new PolymorphismRoundtripFT().Run();
+
          //         new BytesIT().ByteArrays();
          //         new BoolIT().True();
          //         new BoolIT().False();
