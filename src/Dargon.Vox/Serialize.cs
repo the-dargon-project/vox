@@ -145,4 +145,17 @@ namespace Dargon.Vox {
          return Globals.Serializer.Deserialize(dest, hintType);
       }
    }
+
+   public static class CloneStatics {
+      [ThreadStatic] private static MemoryStream ms;
+
+      private static MemoryStream GetMemoryStream() => ms ?? (ms = new MemoryStream());
+
+      public static T DeepCloneSerializable<T>(this T subject) {
+         var ms = GetMemoryStream();
+         Serialize.To(ms, subject);
+         ms.Position = 0;
+         return Deserialize.From<T>(ms);
+      }
+   }
 }
