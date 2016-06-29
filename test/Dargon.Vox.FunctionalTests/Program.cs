@@ -52,6 +52,8 @@ namespace Dargon.Vox {
 
          new PolymorphismRoundtripFT().Run();
 
+         new GlobalSerializerTests().Run();
+
          //         new BytesIT().ByteArrays();
          //         new BoolIT().True();
          //         new BoolIT().False();

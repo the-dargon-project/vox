@@ -126,24 +126,23 @@ namespace Dargon.Vox {
 
    public static class Globals {
       static Globals() {
+         Serializer = new VoxFactory().Create();
       }
 
-      public static FrameWriter FrameWriter { get; }
-      public static FrameReader FrameReader { get; }
+      public static VoxSerializer Serializer { get; }
    }
 
    public static class Serialize {
       public static void To(Stream dest, object subject) {
-         var scratch = new MemoryStream();
-         var target = new SomeMemoryStreamWrapperThing(scratch);
-         Globals.FrameWriter.WriteFrame(target, subject);
-         target.CopyTo(dest);
+         Globals.Serializer.Serialize(dest, subject);
       }
    }
 
    public static class Deserialize {
-      public static object From(Stream dest) {
-         return Globals.FrameReader.ReadFrame(dest, null);
+      public static T From<T>(Stream dest) => (T)From(dest, typeof(T));
+
+      public static object From(Stream dest, Type hintType = null) {
+         return Globals.Serializer.Deserialize(dest, hintType);
       }
    }
 }

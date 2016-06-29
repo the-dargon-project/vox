@@ -20,6 +20,7 @@ namespace Dargon.Vox {
          var result = new List<byte>();
          var s = new Stack<Type>();
          s.Push(arg);
+         int serializedTypeCount = 0;
          while (s.Count != 0) {
             var t = s.Pop();
             if (t.IsArray && t != typeof(string)) {
@@ -31,10 +32,11 @@ namespace Dargon.Vox {
             } else {
                var typeId = typeRegistry.GetTypeIdOrThrow(t);
                VarIntSerializer.WriteVariableInt(result.Add, typeId);
+               serializedTypeCount++;
             }
          }
          var lengthBuffer = new List<byte>();
-         VarIntSerializer.WriteVariableInt(lengthBuffer.Add, result.Count);
+         VarIntSerializer.WriteVariableInt(lengthBuffer.Add, serializedTypeCount);
          // shits given = 0
          for (var i = 0; i < lengthBuffer.Count; i++) {
             result.Insert(i, lengthBuffer[i]);
