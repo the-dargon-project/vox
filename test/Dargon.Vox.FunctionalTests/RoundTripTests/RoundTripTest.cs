@@ -7,7 +7,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using static Dargon.Vox.VoxStatics;
 
 namespace Dargon.Vox.RoundTripTests {
    public class RoundTripTest : NMockitoInstance {
@@ -19,8 +18,8 @@ namespace Dargon.Vox.RoundTripTests {
          var typeIdCounter = 1;
          var typeContextsByTypeId = testTypes.ToDictionary(
             testType => typeIdCounter++,
-            testType => Something(testType));
-         serializer.ImportTypes(new InlineVoxTypes(typeContextsByTypeId));
+            TypeContext.Create);
+         serializer.ImportTypes(new InlineVoxTypes(0, typeContextsByTypeId));
       }
 
       public void MultiThreadedRoundTripTest<T>(IReadOnlyList<T> testCases, int trialsPerCase, int workerCount, Action<T, T> assertEqualsOverride = null) {

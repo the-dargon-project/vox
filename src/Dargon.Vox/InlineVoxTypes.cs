@@ -2,14 +2,10 @@
 
 namespace Dargon.Vox {
    public class InlineVoxTypes : VoxTypes {
-      private readonly IReadOnlyDictionary<int, TypeContext> typeContextsById;
-
-      public InlineVoxTypes(IReadOnlyDictionary<int, TypeContext> typeContextsById) {
-         this.typeContextsById = typeContextsById;
-      }
-
-      public override IReadOnlyDictionary<int, TypeContext> EnumerateTypes() {
-         return typeContextsById;
+      public InlineVoxTypes(int baseId, IReadOnlyDictionary<int, TypeContext> typeContextsById) : base(baseId) {
+         foreach (var kvp in typeContextsById) {
+            Register(kvp.Key, kvp.Value);
+         }
       }
    }
 }
