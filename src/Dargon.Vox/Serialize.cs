@@ -155,7 +155,9 @@ namespace Dargon.Vox {
          var ms = GetMemoryStream();
          Serialize.To(ms, subject);
          ms.Position = 0;
-         return Deserialize.From<T>(ms);
+         var result = Deserialize.From<T>(ms);
+         ms.SetLength(0);
+         return result;
       }
    }
 }
