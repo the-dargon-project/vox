@@ -30,6 +30,12 @@ namespace Dargon.Vox {
             return new CollectionReaderWriter(fullTypeBinaryRepresentationCache, thisIsTotesTheRealLegitThingReaderWriterThing, arg);
          } else if (arg.IsGenericType && arg.GetGenericTypeDefinition() == typeof(SCG.KeyValuePair<,>)) {
             return new KeyValuePairReaderWriter(fullTypeBinaryRepresentationCache, thisIsTotesTheRealLegitThingReaderWriterThing, arg);
+         } else if (arg.IsEnum) {
+            var backingType = Enum.GetUnderlyingType(arg);
+            var backingTypeReaderWriter = Activator.CreateInstance(typeof(IntegerLikeThingReaderWriter<>).MakeGenericType(backingType), fullTypeBinaryRepresentationCache);
+            var enumThingReaderWriterType = typeof(EnumThingReaderWriter<,>).MakeGenericType(arg, backingType);
+            var enumThingReaderWriter = Activator.CreateInstance(enumThingReaderWriterType, backingTypeReaderWriter);
+            return (IThingReaderWriter)enumThingReaderWriter;
          } else {
             ITypeSerializer serializer;
             if (arg.GetAttributeOrNull<AutoSerializableAttribute>() != null) {

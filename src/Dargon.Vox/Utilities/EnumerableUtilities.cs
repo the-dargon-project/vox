@@ -20,6 +20,8 @@ namespace Dargon.Vox.Utilities {
                add => SimplifyType(type.GetElementType()).MakeArrayType());
          } else if (type.IsGenericType) {
             return simplifiedTypeByType.GetOrAdd(type, SimplifyGenericType);
+         } else if (type.IsEnum) {
+            return type.GetEnumUnderlyingType();
          } else {
             return type;
          }

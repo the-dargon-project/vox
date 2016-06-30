@@ -41,6 +41,21 @@ namespace Dargon.Vox.FunctionalTests.RoundTripTests {
          }
       };
 
+      private static readonly ConcurrentDictionary<Enum1, SortedDictionary<string, List<Enum2>>[]> kHardTestData3 = new ConcurrentDictionary<Enum1, SortedDictionary<string, List<Enum2>>[]> {
+         [Enum1.A] = new[] {
+            new SortedDictionary<string, List<Enum2>> {
+               ["Fred"] = new List<Enum2> { Enum2.A, Enum2.B, Enum2.C },
+               ["Banana"] = new List<Enum2> { Enum2.A, Enum2.A, Enum2.A }
+            },
+         },
+         [Enum1.B] = new[] {
+            new SortedDictionary<string, List<Enum2>> {
+               ["saef"] = new List<Enum2> { Enum2.C, Enum2.C, Enum2.C },
+               ["qwe"] = new List<Enum2> { Enum2.B, Enum2.B, Enum2.B }
+            },
+         }
+      };
+
       private static readonly Type[] kTestTypes = { };
 
       public DictionaryLikeRoundtripFT() : base(kTestTypes) { }
@@ -59,5 +74,13 @@ namespace Dargon.Vox.FunctionalTests.RoundTripTests {
       public void HardTest2() {
          MultiThreadedRoundTripTest(new[] { kHardTestData2 }, 1000, 8);
       }
+
+      [Fact]
+      public void HardTest3() {
+         MultiThreadedRoundTripTest(new[] { kHardTestData3 }, 1000, 8);
+      }
+
+      public enum Enum1 { A, B, C }
+      public enum Enum2 { A = int.MinValue, B = 0, C = int.MaxValue }
    }
 }

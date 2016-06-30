@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using Dargon.Commons.Collections;
 using Dargon.Commons.Exceptions;
 using Dargon.Vox.Internals.TypePlaceholders;
 using Dargon.Vox.Utilities;
 
 namespace Dargon.Vox {
    public class ThisIsTotesTheRealLegitThingReaderWriterThing {
+      private static readonly IReadOnlySet<Type> integerTypes = ImmutableSet.Of(typeof(sbyte), typeof(short), typeof(int), typeof(long), typeof(byte), typeof(ushort), typeof(uint), typeof(ulong));
       private readonly ThingReaderWriterContainer thingReaderWriterContainer;
       private readonly TypeReader typeReader;
 
@@ -25,19 +27,25 @@ namespace Dargon.Vox {
          } else if (type == typeof(Type)) {
             Trace.Assert(hintType == null || typeof(Type).IsAssignableFrom(hintType));
             return thingReaderWriterContainer.Get(type).ReadBody(thingReader);
-         } else if (type == typeof(sbyte) || type == typeof(short) || type == typeof(int) || type == typeof(long)) {
+         } else if (integerTypes.Contains(type)) {
             var value = thingReaderWriterContainer.Get(type).ReadBody(thingReader);
-            return hintType == null ? value : Convert.ChangeType(value, hintType);
+            if (hintType == null) {
+               return value;
+            } else if (hintType.IsEnum) {
+               return Convert.ChangeType(value, Enum.GetUnderlyingType(hintType));
+            } else {
+               return Convert.ChangeType(value, hintType);
+            }
          }
 
-         if (hintType != null && !hintType.IsAssignableFrom(type)) {
+         if (hintType != null) {
             var simplifiedType = TypeSimplifier.SimplifyType(hintType);
 
-            if (type != simplifiedType) {
+            if (type == simplifiedType) {
+               type = hintType;
+            } else if (!hintType.IsAssignableFrom(type)) {
                throw new InvalidStateException();
             }
-
-            type = hintType;
          }
          return thingReaderWriterContainer.Get(type).ReadBody(thingReader);
       }

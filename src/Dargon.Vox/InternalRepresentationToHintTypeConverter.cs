@@ -19,7 +19,7 @@ namespace Dargon.Vox {
          var result = Array.CreateInstance(destinationArrayElementType, elements.Length);
          for (var i = 0; i < elements.Length; i++) {
             result.SetValue(
-               ConvertCollectionToHintType(elements.GetValue(i), destinationArrayElementType),
+               ConvertElementToHintType(elements.GetValue(i), destinationArrayElementType),
                i);
          }
          return result;
@@ -38,12 +38,20 @@ namespace Dargon.Vox {
          var enumerator = dictionary.GetEnumerator();
          while (enumerator.MoveNext()) {
             dynamic kvp = enumerator.Current;
-            var key = ConvertCollectionToHintType(kvp.Key, keyType);
-            var value = ConvertCollectionToHintType(kvp.Value, valueType);
+            var key = ConvertElementToHintType(kvp.Key, keyType);
+            var value = ConvertElementToHintType(kvp.Value, valueType);
             var castedIntermediateKvp = Activator.CreateInstance(destinationKvpType, key, value);
             add.Invoke(result, new object [] { castedIntermediateKvp });
          }
          return (IEnumerable)result;
+      }
+
+      public static object ConvertElementToHintType(object element, Type hintType) {
+         if (hintType.IsEnum) {
+            return Enum.ToObject(hintType, Convert.ChangeType(element, hintType.GetEnumUnderlyingType()));
+         } else {
+            return ConvertCollectionToHintType(element, hintType);
+         }
       }
 
       public static object ConvertCollectionToHintType(object collection, Type hintType) {
@@ -53,7 +61,13 @@ namespace Dargon.Vox {
          }
 
          // TODO: This will fail on nulls right now
-         if (hintType.IsInstanceOfType(collection)) {
+         // shortcut for if collection already matches hinttype. Handles strings as well.
+         if (hintType == collection?.GetType()) {
+            return collection;
+         }
+
+         // Don't attempt conversion if collection extends from hintType interface.
+         if (hintType.IsInterface && hintType.IsInstanceOfType(collection)) {
             return collection;
          }
 

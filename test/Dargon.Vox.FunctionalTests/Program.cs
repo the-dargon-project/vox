@@ -9,6 +9,8 @@ namespace Dargon.Vox {
          new StringRoundTripFT().StringRoundTripTest();
          new StringRoundTripFT().StringArrayRoundTripTest();
 
+         new EnumRoundtripFT().EnumValuesTest();
+         new EnumRoundtripFT().EnumArraysTest();
          new IntRoundtripFT().EdgeCaseTest();
          new GuidRoundTripFT().Run();
 
@@ -39,6 +41,7 @@ namespace Dargon.Vox {
          new DictionaryLikeRoundtripFT().EasyTest();
          new DictionaryLikeRoundtripFT().HardTest1();
          new DictionaryLikeRoundtripFT().HardTest2();
+         new DictionaryLikeRoundtripFT().HardTest3();
 
          new AutoTypeSerializerRoundTripFT().SerializeTest();
          new AutoTypeSerializerRoundTripFT().DeserializeTest();
