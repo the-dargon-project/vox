@@ -1,4 +1,5 @@
 ﻿using System;
+using Dargon.Commons.Collections;
 
 namespace Dargon.Vox.Utilities {
    public interface IGenericFlyweightFactory<T> {

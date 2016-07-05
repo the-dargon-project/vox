@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Dargon.Commons;
+using Dargon.Commons.Collections;
 using Dargon.Vox.Utilities;
 
 namespace Dargon.Vox {

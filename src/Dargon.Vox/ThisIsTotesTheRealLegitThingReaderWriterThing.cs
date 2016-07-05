@@ -5,9 +5,11 @@ using Dargon.Commons.Collections;
 using Dargon.Commons.Exceptions;
 using Dargon.Vox.Internals.TypePlaceholders;
 using Dargon.Vox.Utilities;
+using NLog;
 
 namespace Dargon.Vox {
    public class ThisIsTotesTheRealLegitThingReaderWriterThing {
+      private static readonly Logger logger = LogManager.GetCurrentClassLogger();
       private static readonly IReadOnlySet<Type> integerTypes = ImmutableSet.Of(typeof(sbyte), typeof(short), typeof(int), typeof(long), typeof(byte), typeof(ushort), typeof(uint), typeof(ulong));
       private readonly ThingReaderWriterContainer thingReaderWriterContainer;
       private readonly TypeReader typeReader;
@@ -44,6 +46,7 @@ namespace Dargon.Vox {
             if (type == simplifiedType) {
                type = hintType;
             } else if (!hintType.IsAssignableFrom(type)) {
+               logger.Error($"Unable to convert from {type.FullName} to hinted {hintType.FullName}.");
                throw new InvalidStateException();
             }
          }

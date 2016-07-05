@@ -5,10 +5,12 @@ using System.Collections;
 using System.IO;
 using Dargon.Commons.Exceptions;
 using Dargon.Vox.Internals.TypePlaceholders;
+using NLog;
 using SCG = System.Collections.Generic;
 
 namespace Dargon.Vox {
    public class ThingReaderWriterFactory {
+      private static Logger logger = LogManager.GetCurrentClassLogger();
       private readonly FullTypeBinaryRepresentationCache fullTypeBinaryRepresentationCache;
       private ThingReaderWriterContainer thingReaderWriterContainer;
       private ThisIsTotesTheRealLegitThingReaderWriterThing thisIsTotesTheRealLegitThingReaderWriterThing;
@@ -43,6 +45,7 @@ namespace Dargon.Vox {
             } else if (typeof(ISerializableType).IsAssignableFrom(arg)) {
                serializer = (ITypeSerializer)Activator.CreateInstance(typeof(SerializableTypeTypeSerializerProxy<>).MakeGenericType(arg));
             } else {
+               logger.Error("Unable to serialize type " + arg.FullName);
                throw new NotImplementedException();
             }
             var readerWriterType = typeof(UserObjectReaderWriter<>).MakeGenericType(arg);
@@ -103,6 +106,8 @@ namespace Dargon.Vox {
    }
 
    public class UserObjectReaderWriter<TUserType> : IThingReaderWriter {
+      private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+
       private readonly FullTypeBinaryRepresentationCache fullTypeBinaryRepresentationCache;
       private readonly ThisIsTotesTheRealLegitThingReaderWriterThing thisIsTotesTheRealLegitThingReaderWriterThing;
       private readonly Type simplifiedType;
@@ -132,9 +137,14 @@ namespace Dargon.Vox {
          using (var msReader = new BinaryReader(ms)) {
             var slotCount = VarIntSerializer.ReadVariableInt(msReader.ReadByte);
             var readerThing = new ReaderThing(thisIsTotesTheRealLegitThingReaderWriterThing, msReader, slotCount);
-            var subject = Activator.CreateInstance(typeof(TUserType));
-            userTypeSerializer.Deserialize(readerThing, (TUserType)subject);
-            return subject;
+            try {
+               var subject = Activator.CreateInstance(typeof(TUserType));
+               userTypeSerializer.Deserialize(readerThing, (TUserType)subject);
+               return subject;
+            } catch (Exception e) {
+               logger.Error($"Failed to instantiate or deserialize instance of type {typeof(TUserType).Name}.");
+               throw;
+            }
          }
       }
    }
