@@ -1,11 +1,14 @@
 using System;
 using System.Collections.Generic;
 using Dargon.Commons;
+using Dargon.Commons.Collections;
+using Dargon.Commons.Comparers;
 using Dargon.Commons.Exceptions;
 
 namespace Dargon.Vox {
    public class TypeReader {
       private readonly TypeRegistry typeRegistry;
+      private readonly CopyOnAddDictionary<int[], Type> typesByTypeIdParts = new CopyOnAddDictionary<int[], Type>(new IntArrayEqualityComparator());
 
       public TypeReader(TypeRegistry typeRegistry) {
          this.typeRegistry = typeRegistry;
@@ -13,11 +16,16 @@ namespace Dargon.Vox {
 
       public Type ReadType(Func<byte> readByte) {
          var typeCount = VarIntSerializer.ReadVariableInt(readByte);
-         var types = Util.Generate(typeCount, () => {
-            var typeId = VarIntSerializer.ReadVariableInt(readByte);
-            return typeRegistry.GetTypeOrThrow(typeId);
-         });
-         
+         var typeIds = Util.Generate(typeCount, () => VarIntSerializer.ReadVariableInt(readByte));
+
+         return typesByTypeIdParts.GetOrAdd(
+            typeIds,
+            UnpackTypes);
+      }
+
+      public Type UnpackTypes(int[] typeIds) {
+         var types = typeIds.Map(typeRegistry.GetTypeOrThrow);
+
          // special case: if types has 1 element and it's a generic type definition, return it
          if (types.Length == 1 && types[0].IsGenericTypeDefinition) {
             return types[0];
@@ -38,6 +46,28 @@ namespace Dargon.Vox {
             throw new InvalidStateException($"Expected s.Count == 1 but found {s.Count}.");
          }
          return s.Pop();
+      }
+   }
+
+   public class IntArrayEqualityComparator : IEqualityComparer<int[]> {
+      public bool Equals(int[] x, int[] y) {
+         if (x.Length != y.Length) {
+            return false;
+         }
+         for (var i = 0; i < x.Length && i < y.Length; i++) {
+            if (x[i] != y[i]) {
+               return false;
+            }
+         }
+         return true;
+      }
+
+      public int GetHashCode(int[] obj) {
+         var h = 13;
+         for (var i = 0; i < obj.Length; i++) {
+            h = h * 17 + obj[i];
+         }
+         return h;
       }
    }
 }
