@@ -8,13 +8,15 @@ namespace Dargon.Vox {
    public class FullTypeBinaryRepresentationCache {
       private readonly CopyOnAddDictionary<Type, byte[]> binaryRepresentationByType = new CopyOnAddDictionary<Type, byte[]>();
       private readonly TypeRegistry typeRegistry;
+      private readonly Func<Type, byte[]> computeBinaryRepresentationFunc;
 
       public FullTypeBinaryRepresentationCache(TypeRegistry typeRegistry) {
          this.typeRegistry = typeRegistry;
+         this.computeBinaryRepresentationFunc = ComputeBinaryRepresentation;
       }
 
       public byte[] GetOrCompute(Type type) {
-         return binaryRepresentationByType.GetOrAdd(type, ComputeBinaryRepresentation);
+         return binaryRepresentationByType.GetOrAdd(type, computeBinaryRepresentationFunc);
       }
 
       private byte[] ComputeBinaryRepresentation(Type arg) {

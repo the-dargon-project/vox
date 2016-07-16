@@ -77,15 +77,15 @@ namespace Dargon.Vox {
 
    public class ThingReaderWriterContainer {
       private readonly CopyOnAddDictionary<Type, IThingReaderWriter> storage = new CopyOnAddDictionary<Type, IThingReaderWriter>();
-      private readonly ThingReaderWriterFactory thingReaderWriterFactory;
+      private readonly Func<Type, IThingReaderWriter> createThingReaderWriter;
 
       public ThingReaderWriterContainer(ThingReaderWriterFactory thingReaderWriterFactory) {
-         this.thingReaderWriterFactory = thingReaderWriterFactory;
+         createThingReaderWriter = thingReaderWriterFactory.Create;
       }
 
       public void AddOrThrow(Type type, IThingReaderWriter thingReaderWriter) => storage.AddOrThrow(type, thingReaderWriter);
 
-      public IThingReaderWriter Get(Type type) => storage.GetOrAdd(type, thingReaderWriterFactory.Create);
+      public IThingReaderWriter Get(Type type) => storage.GetOrAdd(type, createThingReaderWriter);
    }
 
    public class VoxSerializer {
