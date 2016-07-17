@@ -27,8 +27,8 @@ namespace Dargon.Vox {
          dest.Write(typeBinaryRepresentation);
       }
 
-      public object ReadBody(BinaryReader reader) {
-         return typeReader.ReadType(reader.ReadByte);
+      public object ReadBody(VoxBinaryReader reader) {
+         return typeReader.ReadType(reader);
       }
    }
 
@@ -49,10 +49,10 @@ namespace Dargon.Vox {
          }
       }
 
-      public object ReadBody(BinaryReader reader) {
+      public unsafe object ReadBody(VoxBinaryReader reader) {
          var length = VarIntSerializer.ReadVariableInt(reader.ReadByte);
-         var bytes = reader.ReadBytes(length);
-         return Encoding.UTF8.GetString(bytes);
+         var pString = reader.TakeBytes(length);
+         return Encoding.UTF8.GetString(pString, length);
       }
    }
 
@@ -61,7 +61,7 @@ namespace Dargon.Vox {
          throw new InvalidStateException($"WriteThing invoked on {nameof(BoolThingReaderWriter)}");
       }
 
-      public object ReadBody(BinaryReader reader) {
+      public object ReadBody(VoxBinaryReader reader) {
          throw new InvalidStateException($"ReadBody invoked on {nameof(BoolThingReaderWriter)}");
       }
    }
@@ -77,7 +77,7 @@ namespace Dargon.Vox {
          dest.Write(fullTypeBinaryRepresentationCache.GetOrCompute(typeof(TBoolTrue)));
       }
 
-      public object ReadBody(BinaryReader reader) {
+      public object ReadBody(VoxBinaryReader reader) {
          return true;
       }
    }
@@ -93,7 +93,7 @@ namespace Dargon.Vox {
          dest.Write(fullTypeBinaryRepresentationCache.GetOrCompute(typeof(TBoolFalse)));
       }
 
-      public object ReadBody(BinaryReader reader) {
+      public object ReadBody(VoxBinaryReader reader) {
          return false;
       }
    }
@@ -126,20 +126,15 @@ namespace Dargon.Vox {
          dest.Write(buffer);
       }
 
-      public object ReadBody(BinaryReader reader) {
-         var pBuffer = stackalloc byte[4];
-         pBuffer[0] = reader.ReadByte();
-         pBuffer[1] = reader.ReadByte();
-         pBuffer[2] = reader.ReadByte();
-         pBuffer[3] = reader.ReadByte();
-         return *(float*)pBuffer;
+      public object ReadBody(VoxBinaryReader reader) {
+         return *(float*)reader.TakeBytes(4);
       }
    }
 
    public unsafe class IntegerLikeThingReaderWriter<T> : IThingReaderWriter {
       private readonly FullTypeBinaryRepresentationCache fullTypeBinaryRepresentationCache;
       private readonly Action<SomeMemoryStreamWrapperThing, object> writeThingImpl;
-      private readonly Func<BinaryReader, object> readThingImpl;
+      private readonly Func<VoxBinaryReader, object> readThingImpl;
       [ThreadStatic] private static byte[] writerBuffer;
 
       public IntegerLikeThingReaderWriter(FullTypeBinaryRepresentationCache fullTypeBinaryRepresentationCache) {
@@ -194,7 +189,7 @@ namespace Dargon.Vox {
          writeThingImpl(dest, subject);
       }
 
-      public object ReadBody(BinaryReader reader) {
+      public object ReadBody(VoxBinaryReader reader) {
          return readThingImpl(reader);
       }
 
@@ -299,14 +294,14 @@ namespace Dargon.Vox {
          }
       }
 
-      private object HandleReadBodyInt8(BinaryReader reader) => reader.ReadSByte();
-      private object HandleReadBodyInt16(BinaryReader reader) => reader.ReadInt16();
-      private object HandleReadBodyInt32(BinaryReader reader) => reader.ReadInt32();
-      private object HandleReadBodyInt64(BinaryReader reader) => reader.ReadInt64();
+      private object HandleReadBodyInt8(VoxBinaryReader reader) => *(sbyte*)reader.TakeBytes(1);
+      private object HandleReadBodyInt16(VoxBinaryReader reader) => *(short*)reader.TakeBytes(2);
+      private object HandleReadBodyInt32(VoxBinaryReader reader) => *(int*)reader.TakeBytes(4);
+      private object HandleReadBodyInt64(VoxBinaryReader reader) => *(long*)reader.TakeBytes(8);
 
-      private object HandleReadBodyUInt8(BinaryReader reader) => reader.ReadByte();
-      private object HandleReadBodyUInt16(BinaryReader reader) => reader.ReadUInt16();
-      private object HandleReadBodyUInt32(BinaryReader reader) => reader.ReadUInt32();
-      private object HandleReadBodyUInt64(BinaryReader reader) => reader.ReadUInt64();
+      private object HandleReadBodyUInt8(VoxBinaryReader reader) => *(byte*)reader.TakeBytes(1);
+      private object HandleReadBodyUInt16(VoxBinaryReader reader) => *(ushort*)reader.TakeBytes(2);
+      private object HandleReadBodyUInt32(VoxBinaryReader reader) => *(uint*)reader.TakeBytes(4);
+      private object HandleReadBodyUInt64(VoxBinaryReader reader) => *(ulong*)reader.TakeBytes(8);
    }
 }

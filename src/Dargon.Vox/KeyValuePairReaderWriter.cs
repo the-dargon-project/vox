@@ -34,13 +34,15 @@ namespace Dargon.Vox {
          }
       }
 
-      public object ReadBody(BinaryReader reader) {
-         var length = VarIntSerializer.ReadVariableInt(reader.ReadByte);
-         using (var ms = new MemoryStream(reader.ReadBytes(length)))
-         using (var msReader = new BinaryReader(ms)) {
-            var key = thisIsTotesTheRealLegitThingReaderWriterThing.ReadThing(msReader, userKeyType);
-            var value = thisIsTotesTheRealLegitThingReaderWriterThing.ReadThing(msReader, userValueType);
+      public object ReadBody(VoxBinaryReader reader) {
+         var length = reader.ReadVariableInt();
+         reader.HandleEnterInnerBuffer(length);
+         try {
+            var key = thisIsTotesTheRealLegitThingReaderWriterThing.ReadThing(reader, userKeyType);
+            var value = thisIsTotesTheRealLegitThingReaderWriterThing.ReadThing(reader, userValueType);
             return Activator.CreateInstance(userKvpType, key, value);
+         } finally {
+            reader.HandleLeaveInnerBuffer();
          }
       }
    }

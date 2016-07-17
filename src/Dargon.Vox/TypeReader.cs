@@ -27,11 +27,11 @@ namespace Dargon.Vox {
          return typeIdBuffer;
       }
 
-      public Type ReadType(Func<byte> readByte) {
-         var typeCount = VarIntSerializer.ReadVariableInt(readByte);
+      public Type ReadType(VoxBinaryReader reader) {
+         var typeCount = reader.ReadVariableInt();
          var typeIds = GetTypeIdBuffer(typeCount);
          for (var i = 0; i < typeCount; i++) {
-            typeIds[i] = VarIntSerializer.ReadVariableInt(readByte);
+            typeIds[i] = reader.ReadVariableInt();
          }
          var key = new TypeIdsAndCount { Count = typeCount, TypeIds = typeIds };
          var result = typesByTypeIdParts.GetOrAdd(key, cloneKeyFunc, unpackTypesFunc);

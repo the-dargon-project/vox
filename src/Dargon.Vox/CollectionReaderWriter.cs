@@ -35,17 +35,19 @@ namespace Dargon.Vox {
          }
       }
 
-      public object ReadBody(BinaryReader reader) {
-         var dataLength = VarIntSerializer.ReadVariableInt(reader.ReadByte);
-         using (var ms = new MemoryStream(reader.ReadBytes(dataLength)))
-         using (var dataReader = new BinaryReader(ms)) {
-            var elementCount = VarIntSerializer.ReadVariableInt(dataReader.ReadByte);
+      public object ReadBody(VoxBinaryReader reader) {
+         var dataLength = reader.ReadVariableInt();
+         reader.HandleEnterInnerBuffer(dataLength);
+         try {
+            var elementCount = reader.ReadVariableInt();
             var elements = Array.CreateInstance(elementType, elementCount);
             for (var i = 0; i < elements.Length; i++) {
-               var thing = thingReaderWriterDispatcherThing.ReadThing(dataReader, null);
+               var thing = thingReaderWriterDispatcherThing.ReadThing(reader, null);
                elements.SetValue(thing, i);
             }
             return InternalRepresentationToHintTypeConverter.ConvertCollectionToHintType(elements, userCollectionType);
+         } finally {
+            reader.HandleLeaveInnerBuffer();
          }
       }
    }
@@ -72,7 +74,7 @@ namespace Dargon.Vox {
          }
       }
 
-      public object ReadBody(BinaryReader reader) {
+      public object ReadBody(VoxBinaryReader reader) {
          throw new InvalidStateException("Attempted to deserialize byte array slice internal type instance.");
       }
    }

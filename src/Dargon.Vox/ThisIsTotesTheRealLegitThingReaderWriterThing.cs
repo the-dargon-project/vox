@@ -19,8 +19,8 @@ namespace Dargon.Vox {
          this.typeReader = typeReader;
       }
 
-      public object ReadThing(BinaryReader thingReader, Type hintType) {
-         var type = typeReader.ReadType(thingReader.ReadByte);
+      public object ReadThing(VoxBinaryReader thingReader, Type hintType) {
+         var type = typeReader.ReadType(thingReader);
 
          // special cases for type deserialization
          if (type == typeof(TBoolTrue) || type == typeof(TBoolFalse) || type == typeof(TNull)) {

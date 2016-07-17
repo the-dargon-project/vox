@@ -85,10 +85,10 @@ namespace Dargon.Vox {
 
    public class ReaderThing : IBodyReader {
       private readonly ThisIsTotesTheRealLegitThingReaderWriterThing thisIsTotesTheRealLegitThingReaderWriterThing;
-      private readonly BinaryReader reader;
+      private readonly VoxBinaryReader reader;
       private int slotCount;
 
-      public ReaderThing(ThisIsTotesTheRealLegitThingReaderWriterThing thisIsTotesTheRealLegitThingReaderWriterThing, BinaryReader reader, int slotCount) {
+      public ReaderThing(ThisIsTotesTheRealLegitThingReaderWriterThing thisIsTotesTheRealLegitThingReaderWriterThing, VoxBinaryReader reader, int slotCount) {
          this.thisIsTotesTheRealLegitThingReaderWriterThing = thisIsTotesTheRealLegitThingReaderWriterThing;
          this.reader = reader;
          this.slotCount = slotCount;
@@ -131,12 +131,12 @@ namespace Dargon.Vox {
          }
       }
 
-      public object ReadBody(BinaryReader reader) {
-         var length = VarIntSerializer.ReadVariableInt(reader.ReadByte);
-         using (var ms = new MemoryStream(reader.ReadBytes(length))) 
-         using (var msReader = new BinaryReader(ms)) {
-            var slotCount = VarIntSerializer.ReadVariableInt(msReader.ReadByte);
-            var readerThing = new ReaderThing(thisIsTotesTheRealLegitThingReaderWriterThing, msReader, slotCount);
+      public object ReadBody(VoxBinaryReader reader) {
+         var length = reader.ReadVariableInt();
+         reader.HandleEnterInnerBuffer(length);
+         try {
+            var slotCount = reader.ReadVariableInt();
+            var readerThing = new ReaderThing(thisIsTotesTheRealLegitThingReaderWriterThing, reader, slotCount);
             try {
                var subject = Activator.CreateInstance(typeof(TUserType));
                userTypeSerializer.Deserialize(readerThing, (TUserType)subject);
@@ -145,6 +145,8 @@ namespace Dargon.Vox {
                logger.Error($"Failed to instantiate or deserialize instance of type {typeof(TUserType).Name}.");
                throw;
             }
+         } finally {
+            reader.HandleLeaveInnerBuffer();
          }
       }
    }

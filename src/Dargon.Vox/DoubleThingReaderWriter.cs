@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Runtime.InteropServices;
 
 namespace Dargon.Vox {
    public unsafe class DoubleThingReaderWriter : IThingReaderWriter {
@@ -28,35 +29,33 @@ namespace Dargon.Vox {
          dest.Write(buffer);
       }
 
-      public object ReadBody(BinaryReader reader) {
-         var pBuffer = stackalloc byte[8];
-         pBuffer[0] = reader.ReadByte();
-         pBuffer[1] = reader.ReadByte();
-         pBuffer[2] = reader.ReadByte();
-         pBuffer[3] = reader.ReadByte();
-         pBuffer[4] = reader.ReadByte();
-         pBuffer[5] = reader.ReadByte();
-         pBuffer[6] = reader.ReadByte();
-         pBuffer[7] = reader.ReadByte();
-         return *(double*)pBuffer;
+      public object ReadBody(VoxBinaryReader reader) {
+         return *(double*)reader.TakeBytes(8);
       }
    }
 
    public class GuidThingReaderWriter : IThingReaderWriter {
       private readonly FullTypeBinaryRepresentationCache fullTypeBinaryRepresentationCache;
+      [ThreadStatic] private static byte[] guidBuffer;
 
       public GuidThingReaderWriter(FullTypeBinaryRepresentationCache fullTypeBinaryRepresentationCache) {
          this.fullTypeBinaryRepresentationCache = fullTypeBinaryRepresentationCache;
       }
 
+      private static byte[] GetGuidBuffer() {
+         return guidBuffer ?? (guidBuffer = new byte[16]);
+      }
+
       public void WriteThing(SomeMemoryStreamWrapperThing dest, object subject) {
          dest.Write(fullTypeBinaryRepresentationCache.GetOrCompute(typeof(Guid)));
-
          dest.Write(((Guid)subject).ToByteArray());
       }
 
-      public object ReadBody(BinaryReader reader) {
-         return new Guid(reader.ReadBytes(16));
+      public unsafe object ReadBody(VoxBinaryReader reader) {
+         fixed (byte* pGuidBuffer = GetGuidBuffer()) {
+            reader.ReadBytes(16, pGuidBuffer);
+         }
+         return new Guid(guidBuffer);
       }
    }
 
@@ -89,8 +88,8 @@ namespace Dargon.Vox {
          dest.Write(buffer);
       }
 
-      public object ReadBody(BinaryReader reader) {
-         return new DateTime(reader.ReadInt64());
+      public object ReadBody(VoxBinaryReader reader) {
+         return new DateTime(*(long*)reader.TakeBytes(8));
       }
    }
 
@@ -121,8 +120,8 @@ namespace Dargon.Vox {
          dest.Write(buffer);
       }
 
-      public object ReadBody(BinaryReader reader) {
-         return new TimeSpan(reader.ReadInt64());
+      public object ReadBody(VoxBinaryReader reader) {
+         return new TimeSpan(*(long*)reader.TakeBytes(8));
       }
    }
 }

@@ -13,7 +13,7 @@ namespace Dargon.Vox {
          backingTypeThingReaderWriter.WriteThing(dest, (TBackingType)subject);
       }
 
-      public object ReadBody(BinaryReader reader) {
+      public object ReadBody(VoxBinaryReader reader) {
          return (TEnum)Convert.ChangeType(backingTypeThingReaderWriter.ReadBody(reader), typeof(TBackingType));
       }
    }
