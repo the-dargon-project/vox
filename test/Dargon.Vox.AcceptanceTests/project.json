@@ -2,15 +2,15 @@
     "frameworks": {
         "net451": {
             "frameworkAssemblies": {
-                "System.Xml": ""
+                "System.Xml": "4.0.0.0"
             }
         }
     },
 
     "dependencies": {
-        "Dargon.Vox": "",
-        "Dargon.Vox.InternalTestUtils": "",
-        "NMockito": "",
+        "Dargon.Vox": "*",
+        "Dargon.Vox.InternalTestUtils": "*",
+        "NMockito": "*",
         "protobuf-net": "2.0.0.668"
     },
 
